@@ -1,0 +1,6 @@
+apiVersion: v2
+name: agent007
+description: JRs Control Theory Agent
+type: application
+version: 0.1.1
+appVersion: "1.1.0"

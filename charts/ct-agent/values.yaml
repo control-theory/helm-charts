@@ -1,0 +1,52 @@
+replicaCount: 1
+image:
+  repository: controltheory/supervisor
+  pullPolicy: Always
+  tag: latest
+
+deployment:
+  controlplane:
+    admission_token: "you-need-to-provide-it"
+    endpoint: "controlplane:4320"
+    scheme: ws
+  pvc:
+    enabled: true
+    accessMode: ReadWriteOnce
+    size: 4Gi
+    storageClass: persist
+  args:
+    - --config
+    - /var/ct/config.yaml
+  env:
+    AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+    AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+    AWS_REGION: ${AWS_REGION}
+
+resources:
+  enabled: true
+  cpu:
+    request: 100m
+    limit: 250m
+  memory:
+    request: 500Mi
+    limit: 1Gi
+
+serviceAccount:
+  create: false
+
+service:
+  otelhttp:
+    type: ClusterIP
+    port: 4318
+  otelgrpc:
+    type: ClusterIP
+    port: 4317
+  statsd:
+    type: ClusterIP
+    port: 8125
+
+autoscaling:
+  enabled: false
+#
+ingress:
+  enabled: false

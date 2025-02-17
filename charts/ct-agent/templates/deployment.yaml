@@ -1,0 +1,81 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: {{ .Values.deployment.replicas }}
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}
+    spec:
+{{- if .Values.imagePullSecret }}
+      imagePullSecrets:
+        - name: {{ .Values.imagePullSecret }}
+{{- end }}
+      volumes:
+{{- if .Values.deployment.pvc }}
+        - name: storage-volume
+          persistentVolumeClaim:
+            claimName: {{ .Release.Name }}-pvc
+{{- end }}
+        - name: config-volume
+          configMap:
+            name: {{ .Release.Name }}-config
+      containers:
+      - name: {{ .Release.Name }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag}}"
+        imagePullPolicy: "{{ .Values.image.pullPolicy }}"
+{{- if .Values.resources }}
+{{- if .Values.resources.enabled }}
+        resources:
+          requests:
+            cpu: "{{ .Values.resources.cpu.request }}"
+            memory: "{{ .Values.resources.memory.request }}"
+          limits:
+            cpu: "{{ .Values.resources.cpu.limit }}"
+            memory: "{{ .Values.resources.memory.limit }}"
+{{- end }}
+{{- end }}
+{{- if  .Values.deployment.args }}
+        args:
+          {{- range .Values.deployment.args }}
+          - {{ . | quote }}
+          {{- end }}
+{{- end }}
+{{- if  .Values.deployment.env }}
+        env:
+          - name: CONTROLPLANE_ENDPOINT
+            value: "{{ .Values.deployment.controlplane.scheme }}://{{ .Values.deployment.controlplane.endpoint }}/v1/opamp"
+          - name: ADMISSION_TOKEN
+            value: "{{ .Values.deployment.controlplane.admission_token }}"
+        {{- range $name, $value := .Values.deployment.env }}
+          - name: {{ $name }}
+            value: "{{ $value }}"
+        {{- end }}
+{{- end }}
+        volumeMounts:
+{{- if .Values.deployment.pvc }}
+          - name: storage-volume
+            mountPath: /data
+{{- end }}
+          - name: config-volume
+            mountPath: /var/ct
+            readOnly: true
+        ports:
+          - name: {{ .Release.Name }}-http
+            containerPort: {{ .Values.service.otelhttp.port  }}
+          - name: {{ .Release.Name }}-grpc
+            containerPort: {{ .Values.service.otelgrpc.port  }}
+          - name: {{ .Release.Name }}-sd
+            containerPort: {{ .Values.service.statsd.port  }}
+{{- if .Values.deployment.nodegroup }}
+      nodeSelector:
+          alpha.eksctl.io/nodegroup-name: "{{ .Values.deployment.nodegroup }}"
+{{- end }}
