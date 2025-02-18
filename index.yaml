@@ -14,6 +14,16 @@ entries:
   ct-agent:
   - apiVersion: v2
     appVersion: 1.1.0
+    created: "2025-02-18T23:14:43.73944942Z"
+    description: ControlTheory Agent
+    digest: 5cb70b0e855d35f87d1c166bd458ed9f60fd49840acedcac47cf78c41f441fec
+    name: ct-agent
+    type: application
+    urls:
+    - https://github.com/control-theory/helm-charts/releases/download/ct-agent-0.1.3/ct-agent-0.1.3.tgz
+    version: 0.1.3
+  - apiVersion: v2
+    appVersion: 1.1.0
     created: "2025-02-18T20:57:28.628686455Z"
     description: ControlTheory Agent
     digest: a32c738c57dbb8ae5b33a8597df544b39005321d39afb87ae3cd7a49d3987243
@@ -32,4 +42,4 @@ entries:
     urls:
     - https://github.com/control-theory/helm-charts/releases/download/ct-agent-0.1.1/ct-agent-0.1.1.tgz
     version: 0.1.1
-generated: "2025-02-18T20:57:28.628692406Z"
+generated: "2025-02-18T23:14:43.739467925Z"
