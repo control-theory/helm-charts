@@ -10,7 +10,7 @@ data:
     server:
       admission_token: {{ .Values.deployment.controlplane.admission_token }}
       # point to the OpAMP Server
-      endpoint: "{{ .Values.deployment.controlplane.scheme }}://{{ .Values.deployment.controlplane.endpoint }}/v1/opamp"
+      endpoint: {{ .Values.deployment.controlplane.endpoint }}
       tls:
         insecure: true
         # Disable verification to test locally.
