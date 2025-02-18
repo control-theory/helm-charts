@@ -1,6 +1,6 @@
 apiVersion: v2
 name: ct-agent
-description: Control Theory Agent
+description: ControlTheory Agent
 type: application
 version: 0.1.1
 appVersion: "1.1.0"
