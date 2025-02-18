@@ -17,10 +17,6 @@ deployment:
   args:
     - --config
     - /var/ct/config.yaml
-  env:
-    AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
-    AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
-    AWS_REGION: ${AWS_REGION}
 
 resources:
   enabled: true
