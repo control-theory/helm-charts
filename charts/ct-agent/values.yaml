@@ -7,8 +7,7 @@ image:
 deployment:
   controlplane:
     admission_token: "you-need-to-provide-it"
-    endpoint: "controlplane:4320"
-    scheme: ws
+    endpoint: "ws://controlplane:4320/v1/opamp"
   pvc:
     enabled: true
     accessMode: ReadWriteOnce
