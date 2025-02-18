@@ -52,7 +52,7 @@ spec:
 {{- if  .Values.deployment.env }}
         env:
           - name: CONTROLPLANE_ENDPOINT
-            value: "{{ .Values.deployment.controlplane.scheme }}://{{ .Values.deployment.controlplane.endpoint }}/v1/opamp"
+            value: "{{ .Values.deployment.controlplane.endpoint }}"
           - name: ADMISSION_TOKEN
             value: "{{ .Values.deployment.controlplane.admission_token }}"
         {{- range $name, $value := .Values.deployment.env }}
