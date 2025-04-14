@@ -1,0 +1,112 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}
+    spec:
+{{- if .Values.serviceAccount.create }}
+      serviceAccountName: {{ .Values.serviceAccount.name }}
+{{- end }}
+{{- if .Values.imagePullSecret }}
+      imagePullSecrets:
+        - name: {{ .Values.imagePullSecret }}
+{{- end }}
+      volumes:
+{{- if and .Values.deployment.pvc .Values.deployment.pvc.enabled }}
+        - name: storage-volume
+          persistentVolumeClaim:
+            claimName: {{ .Release.Name }}-pvc
+{{- end}}
+{{- if .Values.storageHostPath.enable }}
+        - name: storage-volume
+          hostPath:
+            path: {{ .Values.storageHostPath.path }}
+            type: DirectoryOrCreate
+{{- end }}
+        - name: varlog
+          hostPath:
+            path: /var/log
+        - name: dockerlogs
+          hostPath:
+            path: /var/lib/docker/containers
+        - name: containerdlogs
+          hostPath:
+            path: /var/log/pods
+      containers:
+      - name: {{ .Release.Name }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag}}"
+        imagePullPolicy: "{{ .Values.image.pullPolicy }}"
+{{- if .Values.resources }}
+{{- if .Values.resources.enabled }}
+        resources:
+          requests:
+            cpu: "{{ .Values.resources.cpu.request }}"
+            memory: "{{ .Values.resources.memory.request }}"
+          limits:
+            cpu: "{{ .Values.resources.cpu.limit }}"
+            memory: "{{ .Values.resources.memory.limit }}"
+{{- end }}
+{{- end }}
+        env:
+        - name: K8S_NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: CONTROLPLANE_ENDPOINT
+          value: "{{ .Values.deployment.controlplane.endpoint }}"
+        - name: ADMISSION_TOKEN
+          value: "{{ .Values.deployment.controlplane.admission_token }}"
+{{- if .Values.deployment.otel }}
+{{- if .Values.deployment.otel.resource_attributes }}
+        - name: OTEL_RESOURCE_ATTRIBUTES
+          value: "{{- $attrs := .Values.deployment.otel.resource_attributes -}}
+                      {{- $pairs := list -}}
+                      {{- range $attr := $attrs -}}
+                        {{- range $k, $v := $attr -}}
+                          {{- $pairs = append $pairs (printf "%s=%s" $k $v) -}}
+                        {{- end -}}
+                      {{- end -}}
+                      {{ join "," $pairs }}"
+{{- end }}
+{{- end }}
+{{- if .Values.deployment.args }}
+        args:
+          {{- range .Values.deployment.args }}
+          - {{ . | quote }}
+          {{- end }}
+{{- end }}
+        volumeMounts:
+{{- if or (and .Values.deployment.pvc .Values.deployment.pvc.enabled) (and .Values.storageHostPath .Values.storageHostPath.enable) }}
+          - name: storage-volume
+            mountPath: /data
+{{- end }}
+          - name: varlog
+            mountPath: /var/log
+            readOnly: true
+          - name: dockerlogs
+            mountPath: /var/lib/docker/containers
+            readOnly: true
+          - name: containerdlogs
+            mountPath: /var/log/pods
+            readOnly: true
+        ports:
+          - name: {{ .Release.Name }}-http
+            containerPort: {{ .Values.service.otelhttp.port  }}
+          - name: {{ .Release.Name }}-grpc
+            containerPort: {{ .Values.service.otelgrpc.port  }}
+          - name: {{ .Release.Name }}-sd
+            protocol: UDP
+            containerPort: {{ .Values.service.statsd.port  }}
+{{- if .Values.deployment.nodegroup }}
+      nodeSelector:
+          alpha.eksctl.io/nodegroup-name: "{{ .Values.deployment.nodegroup }}"
+{{- end }}

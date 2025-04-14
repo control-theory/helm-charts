@@ -1,0 +1,23 @@
+# template for a persistent volume claim if enabled
+---
+{{- if .Values.deployment.pvc }}
+{{- if .Values.deployment.pvc.enabled }}
+{{- $storageClassName := "persist" -}}
+{{- if and .Values.storageClass (hasKey .Values.storageClass "name") -}}
+  {{- $storageClassName = .Values.storageClass.name -}}
+{{- end }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Release.Name }}-pvc
+  annotations:
+    "helm.sh/resource-policy": keep  # Prevents PVC deletion on uninstall
+spec:
+  accessModes:
+    - {{ .Values.deployment.pvc.accessMode | default "ReadWriteOnce" }}
+  resources:
+    requests:
+      storage: {{ .Values.deployment.pvc.size | default "4Gi" }}
+  storageClassName: {{ $storageClassName }}
+{{- end }}
+{{- end }}
