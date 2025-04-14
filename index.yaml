@@ -42,4 +42,15 @@ entries:
     urls:
     - https://github.com/control-theory/helm-charts/releases/download/ct-agent-0.1.1/ct-agent-0.1.1.tgz
     version: 0.1.1
-generated: "2025-02-18T23:14:43.739467925Z"
+  k8s-agent:
+  - apiVersion: v2
+    appVersion: 1.1.1
+    created: "2025-04-14T22:35:15.56240206Z"
+    description: ControlTheory k8s Agent
+    digest: 9ae16236d465ee4b0dc9afd5085fb368050acdfd834f823e91a2294e85e6f22a
+    name: k8s-agent
+    type: application
+    urls:
+    - https://github.com/control-theory/helm-charts/releases/download/k8s-agent-0.42.0/k8s-agent-0.42.0.tgz
+    version: 0.42.0
+generated: "2025-04-14T22:35:15.562413061Z"
