@@ -22,7 +22,7 @@ deployment:
     storageClass: persist
   args:
     - --config
-    - /var/ct/config.yaml
+    - /config.yaml
   otel:
     resource_attributes:
       - deployment.environment.name: staging
