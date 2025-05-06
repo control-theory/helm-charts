@@ -13,5 +13,5 @@ spec:
   resources:
     requests:
       storage: {{ .Values.deployment.pvc.size | default "4Gi" }}
-  storageClassName: {{ .Values.deployment.pvc.storageClass | default "persist" }}
+  storageClassName: {{ .Values.deployment.pvc.storageClass }}
 {{- end }}
