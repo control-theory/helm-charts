@@ -2,7 +2,7 @@ replicaCount: 1
 image:
   repository: controltheory/supervisor
   pullPolicy: Always
-  tag: latest
+  tag:  v0.121.0
 
 deployment:
   controlplane:
@@ -12,10 +12,9 @@ deployment:
     enabled: true
     accessMode: ReadWriteOnce
     size: 4Gi
-    storageClass: persist
   args:
     - --config
-    - /var/ct/config.yaml
+    - /config.yaml
 
 resources:
   enabled: true
@@ -27,7 +26,8 @@ resources:
     limit: 1Gi
 
 serviceAccount:
-  create: false
+  create: true
+  name: otel-collector-admin
 
 service:
   otelhttp:

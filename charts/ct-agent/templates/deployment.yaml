@@ -15,6 +15,9 @@ spec:
       labels:
         app: {{ .Release.Name }}
     spec:
+{{- if .Values.serviceAccount.create }}
+      serviceAccountName: {{ .Values.serviceAccount.name }}
+{{- end }}
 {{- if .Values.imagePullSecret }}
       imagePullSecrets:
         - name: {{ .Values.imagePullSecret }}
