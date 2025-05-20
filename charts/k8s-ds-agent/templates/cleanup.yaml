@@ -1,0 +1,41 @@
+# Cleanup DaemonSet if storagehostpath is not empty
+# If storagehostpath is not empty, cleanup the hostPath
+{{- if and .Values.storageHostPath .Values.storageHostPath.enable }}
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: "{{ .Release.Name }}-cleanup"
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Release.Name }}-cleanup
+  annotations:
+    "helm.sh/hook": pre-delete
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  selector:
+    matchLabels:
+      app: "{{ .Release.Name }}-cleanup"
+  template:
+    metadata:
+      labels:
+        app: "{{ .Release.Name }}-cleanup"
+    spec:
+      restartPolicy: Always
+      containers:
+        - name: cleanup
+          image: alpine:3.18
+          command: ["/bin/sh", "-c"]
+          args:
+            - >
+              echo "Cleaning up hostPath {{ .Values.storageHostPath.path }}/{{ .Release.Name }}";
+              rm -rf {{ .Values.storageHostPath.path }}/{{ .Release.Name }};
+              echo "Cleanup complete";
+          volumeMounts:
+            - name: host-volume
+              mountPath: {{ .Values.storageHostPath.path }}/{{ .Release.Name }}
+      volumes:
+        - name: host-volume
+          hostPath:
+            path: {{ .Values.storageHostPath.path }}/{{ .Release.Name }}
+            type: Directory
+{{- end }}

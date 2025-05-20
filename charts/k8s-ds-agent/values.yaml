@@ -3,11 +3,6 @@ image:
   repository: controltheory/supervisor
   pullPolicy: Always
   tag: v0.121.0
-cloudProvider: local
-storageClass:
-  create: false
-  name: persist
-  customProvisioner: microk8s.io/hostpath
 storageHostPath:
   enable: true
   path: /var/ct/agent-data
@@ -15,11 +10,6 @@ deployment:
   controlplane:
     admission_token: "you-need-to-provide-it"
     endpoint: "ws://controlplane:4320/v1/opamp"
-  pvc:
-    enabled: false
-    accessMode: ReadWriteOnce
-    size: 4Gi
-    storageClass: persist
   args:
     - --config
     - /config.yaml
