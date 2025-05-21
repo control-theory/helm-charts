@@ -16,20 +16,11 @@ spec:
 {{- if .Values.serviceAccount.create }}
       serviceAccountName: {{ .Values.serviceAccount.name }}
 {{- end }}
-{{- if .Values.imagePullSecret }}
-      imagePullSecrets:
-        - name: {{ .Values.imagePullSecret }}
-{{- end }}
       volumes:
-{{- if and .Values.deployment.pvc .Values.deployment.pvc.enabled }}
-        - name: storage-volume
-          persistentVolumeClaim:
-            claimName: {{ .Release.Name }}-pvc
-{{- end}}
 {{- if .Values.storageHostPath.enable }}
         - name: storage-volume
           hostPath:
-            path: {{ .Values.storageHostPath.path }}
+            path: {{ .Values.storageHostPath.path }}/{{ .Release.Name }}
             type: DirectoryOrCreate
 {{- end }}
         - name: varlog
@@ -85,7 +76,7 @@ spec:
           {{- end }}
 {{- end }}
         volumeMounts:
-{{- if or (and .Values.deployment.pvc .Values.deployment.pvc.enabled) (and .Values.storageHostPath .Values.storageHostPath.enable) }}
+{{- if and .Values.storageHostPath .Values.storageHostPath.enable }}
           - name: storage-volume
             mountPath: /data
 {{- end }}
@@ -106,7 +97,3 @@ spec:
           - name: {{ .Release.Name }}-sd
             protocol: UDP
             containerPort: {{ .Values.service.statsd.port  }}
-{{- if .Values.deployment.nodegroup }}
-      nodeSelector:
-          alpha.eksctl.io/nodegroup-name: "{{ .Values.deployment.nodegroup }}"
-{{- end }}
