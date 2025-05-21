@@ -28,8 +28,9 @@ spec:
           args:
             - >
               echo "Cleaning up hostPath {{ .Values.storageHostPath.path }}/{{ .Release.Name }}";
-              rm -rf {{ .Values.storageHostPath.path }}/{{ .Release.Name }};
-              echo "Cleanup complete";
+              rm -f {{ .Values.storageHostPath.path }}/{{ .Release.Name }}/*;
+              echo "Cleanup attempted";
+              exit 0;
           volumeMounts:
             - name: host-volume
               mountPath: {{ .Values.storageHostPath.path }}/{{ .Release.Name }}
