@@ -48,6 +48,10 @@ spec:
 {{- end }}
 {{- end }}
         env:
+        - name: CT_DEPLOY_KIND
+          value: "daemonset"
+        - name: HELM_OPERATION
+          value: {{ if .Release.IsInstall }}"install"{{ else if .Release.IsUpgrade }}"upgrade"{{ else }}"other"{{ end }}
         - name: K8S_NODE_NAME
           valueFrom:
             fieldRef:
