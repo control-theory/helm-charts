@@ -3,4 +3,4 @@ appVersion: 1.1.1
 description: ControlTheory DaemonSet Kubernetes Agent
 name: k8s-agent
 type: application
-version: 0.43.2
+version: 0.44.0
