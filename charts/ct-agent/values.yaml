@@ -8,10 +8,6 @@ deployment:
   controlplane:
     admission_token: "you-need-to-provide-it"
     endpoint: "ws://controlplane:4320/v1/opamp"
-  pvc:
-    enabled: true
-    accessMode: ReadWriteOnce
-    size: 4Gi
   args:
     - --config
     - /config.yaml
