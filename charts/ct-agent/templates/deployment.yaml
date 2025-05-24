@@ -64,6 +64,6 @@ spec:
           - name: {{ .Release.Name }}-sd
             containerPort: {{ .Values.service.statsd.port  }}
 {{- if .Values.deployment.nodeSelector }}
-nodeSelector:
-  {{- toYaml .Values.deployment.nodeSelector | nindent 2 }}
+      nodeSelector:
+        {{- toYaml .Values.deployment.nodeSelector | nindent 2 }}
 {{- end }}
