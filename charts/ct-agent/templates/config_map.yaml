@@ -1,35 +1,9 @@
+{{- $configMapName := printf "%s-agentid" .Release.Name }}
+{{- $existing := lookup "v1" "ConfigMap" .Release.Namespace $configMapName }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ .Release.Name }}-config
-  labels:
-    app: {{ .Release.Name }}
+  name: {{ $configMapName }}
+  namespace: {{ .Release.Namespace }}
 data:
-  config.yaml: |
-    debug: true
-    server:
-      admission_token: {{ .Values.deployment.controlplane.admission_token }}
-      # point to the OpAMP Server
-      endpoint: {{ .Values.deployment.controlplane.endpoint }}
-      tls:
-        insecure: true
-        # Disable verification to test locally.
-        # Don't do this in production.
-        insecure_skip_verify: true
-        # For more TLS settings see config/configtls.ClientConfig
-
-    capabilities:
-      reports_effective_config: true
-      reports_own_metrics: true
-      reports_health: true
-      accepts_remote_config: true
-      reports_remote_config: true
-
-    agent:
-      executable: /ctotel
-      args:
-        - --config
-        - /data/effective.yaml
-
-    storage:
-      directory: /data
+  instance_uid: {{ if $existing }}{{ index $existing.data "instance_uid" }}{{ else }}{{ uuidv4 }}{{ end }}

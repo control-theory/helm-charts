@@ -8,14 +8,11 @@ deployment:
   controlplane:
     admission_token: "you-need-to-provide-it"
     endpoint: "ws://controlplane:4320/v1/opamp"
-  pvc:
-    enabled: true
-    accessMode: ReadWriteOnce
-    size: 4Gi
   args:
     - --config
     - /config.yaml
-
+#  nodeSelector:
+#    node-role.kubernetes.io/agent: ""
 resources:
   enabled: true
   cpu:
@@ -27,7 +24,6 @@ resources:
 
 serviceAccount:
   create: true
-  name: otel-collector-admin
 
 service:
   otelhttp:
