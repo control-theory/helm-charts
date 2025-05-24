@@ -11,7 +11,8 @@ deployment:
   args:
     - --config
     - /config.yaml
-
+#  nodeSelector:
+#    node-role.kubernetes.io/agent: ""
 resources:
   enabled: true
   cpu:
@@ -23,7 +24,6 @@ resources:
 
 serviceAccount:
   create: true
-  name: otel-collector-admin
 
 service:
   otelhttp:
