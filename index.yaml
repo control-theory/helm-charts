@@ -14,6 +14,16 @@ entries:
   ct-agent:
   - apiVersion: v2
     appVersion: 1.1.0
+    created: "2025-05-27T15:37:34.868365344Z"
+    description: ControlTheory Kubernetes Agent
+    digest: cff8b8e6cf67c9ece71524bd5597c403c634aabe5cf6b5346dace55b3a95ca12
+    name: ct-agent
+    type: application
+    urls:
+    - https://github.com/control-theory/helm-charts/releases/download/ct-agent-0.1.5/ct-agent-0.1.5.tgz
+    version: 0.1.5
+  - apiVersion: v2
+    appVersion: 1.1.0
     created: "2025-05-06T21:23:53.518024483Z"
     description: ControlTheory Kubernetes Agent
     digest: 03c07d289734155f3fe0a8ded47d7a9b2ac614cf00223463dd8cc41a650923f2
@@ -113,4 +123,4 @@ entries:
     urls:
     - https://github.com/control-theory/helm-charts/releases/download/k8s-agent-0.42.0/k8s-agent-0.42.0.tgz
     version: 0.42.0
-generated: "2025-05-22T00:13:48.315777006Z"
+generated: "2025-05-27T15:37:34.868392597Z"
