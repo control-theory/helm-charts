@@ -16,21 +16,8 @@ spec:
         app: {{ .Release.Name }}
     spec:
 {{- if .Values.serviceAccount.create }}
-      serviceAccountName: {{ .Values.serviceAccount.name }}
+      serviceAccountName: {{ .Release.Name }}-sa
 {{- end }}
-{{- if .Values.imagePullSecret }}
-      imagePullSecrets:
-        - name: {{ .Values.imagePullSecret }}
-{{- end }}
-      volumes:
-{{- if .Values.deployment.pvc }}
-        - name: storage-volume
-          persistentVolumeClaim:
-            claimName: {{ .Release.Name }}-pvc
-{{- end }}
-        - name: config-volume
-          configMap:
-            name: {{ .Release.Name }}-config
       containers:
       - name: {{ .Release.Name }}
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag}}"
@@ -52,25 +39,23 @@ spec:
           - {{ . | quote }}
           {{- end }}
 {{- end }}
-{{- if  .Values.deployment.controlplane }}
+
         env:
+          - name: AGENT_INSTANCE_ID
+            valueFrom:
+              configMapKeyRef:
+                name: {{ .Release.Name }}-agentid
+                key: instance_uid          
+{{- if  .Values.deployment.controlplane }}
           - name: CONTROLPLANE_ENDPOINT
             value: "{{ .Values.deployment.controlplane.endpoint }}"
           - name: ADMISSION_TOKEN
             value: "{{ .Values.deployment.controlplane.admission_token }}"
+{{- end }}
         {{- range $name, $value := .Values.deployment.env }}
           - name: {{ $name }}
             value: "{{ $value }}"
         {{- end }}
-{{- end }}
-        volumeMounts:
-{{- if .Values.deployment.pvc }}
-          - name: storage-volume
-            mountPath: /data
-{{- end }}
-          - name: config-volume
-            mountPath: /var/ct
-            readOnly: true
         ports:
           - name: {{ .Release.Name }}-http
             containerPort: {{ .Values.service.otelhttp.port  }}
@@ -78,7 +63,7 @@ spec:
             containerPort: {{ .Values.service.otelgrpc.port  }}
           - name: {{ .Release.Name }}-sd
             containerPort: {{ .Values.service.statsd.port  }}
-{{- if .Values.deployment.nodegroup }}
+{{- if .Values.deployment.nodeSelector }}
       nodeSelector:
-          alpha.eksctl.io/nodegroup-name: "{{ .Values.deployment.nodegroup }}"
+        {{- toYaml .Values.deployment.nodeSelector | nindent 2 }}
 {{- end }}
