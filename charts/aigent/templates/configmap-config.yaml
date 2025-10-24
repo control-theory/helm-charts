@@ -1,0 +1,216 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-config
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "aigent.labels" . | nindent 4 }}
+data:
+  aigent.yaml: |
+    # === OpenTelemetry Receivers ===
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:{{ .Values.ports.otelgrpc }}
+          http:
+            endpoint: 0.0.0.0:{{ .Values.ports.otelhttp }}
+            cors:
+              allowed_origins: ["*"]
+              allowed_headers: ["*"]
+{{- if .Values.gateway.enabled }}
+      k8sobjects:
+        objects:
+          - name: events
+            mode: watch
+            group: events.k8s.io
+            exclude_watch_type:
+              - DELETED
+{{- end }}
+
+    processors:
+      # Add deployment environment and cluster name as resource attributes
+      resource:
+        attributes:
+          - key: deployment.environment
+            value: {{ .Values.environment }}
+            action: upsert
+          - key: k8s.cluster.name
+            value: {{ .Values.cluster }}
+            action: upsert
+
+      # Transform k8s events to add severity information
+      transform/k8sevents:
+        log_statements:
+          - context: log
+            statements:
+              - set(severity_text, "INFO")
+              - set(severity_number, 9)
+        error_mode: ignore
+
+      # Add service.name as "kubernetes" if not present for k8s events
+      resource/k8sevents:
+        attributes:
+          - key: service.name
+            value: "kubernetes"
+            action: insert
+
+      # Add service.name from k8s.deployment.name if service.name is missing
+      resource/servicename:
+        attributes:
+          - key: service.name
+            from_attribute: k8s.deployment.name
+            action: insert
+
+      # Kubernetes attributes processor
+      k8sattributes:
+        passthrough: false
+        extract:
+          metadata:
+            - k8s.namespace.name
+            - k8s.deployment.name
+            - k8s.pod.name
+            - k8s.pod.uid
+            - k8s.node.name
+          labels:
+            - tag_name: app
+              key: app
+              from: pod
+        pod_association:
+          - sources:
+              - from: resource_attribute
+                name: k8s.pod.ip
+          - sources:
+              - from: resource_attribute
+                name: k8s.pod.uid
+          - sources:
+              - from: connection
+
+      # Resource detection processor
+      resourcedetection:
+        detectors: [env, system]
+        timeout: 5s
+
+    exporters:
+      debug:
+      nop:
+
+    connectors:
+      connectorbob/logs:
+        statler_extension: statler
+
+    extensions:
+      statler:
+        start_server: false
+        start_client: true
+        client:
+          export_interval: 60s
+          bucket_size: 60s
+          max_log_samples: 1000
+          max_patterns: 7
+          group_by_dimensions: ["service", "deployment", "pod", "category", "phrase", "host"]
+          server_address: {{ required "butler.endpoint is required (e.g., butler.namespace.stage.controltheory.com:443)" .Values.butler.endpoint }}
+          use_tls: {{ .Values.butler.useTLS }}
+
+    service:
+      telemetry:
+        logs:
+          level: "INFO"
+          encoding: "json"
+        metrics:
+          level: "none"
+      extensions:
+        - statler
+      pipelines:
+{{- if .Values.gateway.enabled }}
+        # Gateway mode: Full processing pipeline for application logs
+        logs:
+          receivers:
+            - otlp
+          processors:
+            - k8sattributes
+            - resource/servicename  # Add service.name from k8s.deployment.name if missing
+            - resourcedetection
+            - resource
+          exporters:
+            - connectorbob/logs
+            - debug
+
+        # Kubernetes events pipeline with detailed logging
+        logs/k8sevents:
+          receivers:
+            - k8sobjects
+          processors:
+            - transform/k8sevents  # Add severity info
+            - resource/k8sevents   # Add service.name=kubernetes if not present
+            - k8sattributes
+            - resourcedetection
+            - resource
+          exporters:
+            - connectorbob/logs
+            - debug
+
+        # ConnectorBob output pipeline (Statler summaries)
+        logs/connectorbob:
+          receivers:
+            - connectorbob/logs
+          exporters:
+            - nop
+
+        # Traces pipeline with full processing
+        traces:
+          receivers:
+            - otlp
+          processors:
+            - k8sattributes
+            - resourcedetection
+            - resource
+          exporters:
+            - debug
+
+        # Metrics pipeline with full processing
+        metrics:
+          receivers:
+            - otlp
+          processors:
+            - k8sattributes
+            - resourcedetection
+            - resource
+          exporters:
+            - debug
+{{- else }}
+        # Standard mode: Minimal processing for pre-processed data
+        logs:
+          receivers:
+            - otlp
+          processors:
+            - resource
+          exporters:
+            - connectorbob/logs
+            - debug
+
+        # ConnectorBob output pipeline (Statler summaries)
+        logs/connectorbob:
+          receivers:
+            - connectorbob/logs
+          exporters:
+            - nop
+
+        # Traces pipeline with basic processing
+        traces:
+          receivers:
+            - otlp
+          processors:
+            - resource
+          exporters:
+            - debug
+
+        # Metrics pipeline with basic processing
+        metrics:
+          receivers:
+            - otlp
+          processors:
+            - resource
+          exporters:
+            - debug
+{{- end }}

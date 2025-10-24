@@ -1,0 +1,6 @@
+apiVersion: v2
+name: aigent
+description: ControlTheory AIgent - OpenTelemetry collector with log analysis
+type: application
+version: 1.0.0
+appVersion: "0.3.0"

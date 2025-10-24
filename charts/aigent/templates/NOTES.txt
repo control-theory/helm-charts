@@ -1,0 +1,17 @@
+AIgent has been deployed!
+
+Release:     {{ .Release.Name }}
+Namespace:   {{ .Release.Namespace }}
+Environment: {{ .Values.environment }}
+Cluster:     {{ .Values.cluster }}
+
+Services:
+- OTLP HTTP: {{ .Release.Name }}-http:{{ .Values.ports.otelhttp }}
+- OTLP gRPC: {{ .Release.Name }}-grpc:{{ .Values.ports.otelgrpc }}
+- Tallyman:  {{ .Release.Name }}-tally:{{ .Values.ports.tallyman }}
+
+To view logs:
+  kubectl logs -n {{ .Release.Namespace }} -l app={{ .Release.Name }} -f
+
+To view configuration:
+  kubectl get cm -n {{ .Release.Namespace }} {{ .Release.Name }}-config -o jsonpath='{.data.aigent\.yaml}'

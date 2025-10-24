@@ -1,0 +1,69 @@
+{{- include "aigent.validateRequiredFields" . }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "aigent.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.deployment.replicas }}
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      {{- include "aigent.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "aigent.selectorLabels" . | nindent 8 }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap-config.yaml") . | sha256sum }}
+    spec:
+{{- if .Values.serviceAccount.create }}
+      serviceAccountName: {{ include "aigent.serviceAccountName" . }}
+{{- end }}
+      containers:
+      - name: {{ .Release.Name }}
+        image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag}}"
+        imagePullPolicy: "{{ .Values.image.pullPolicy }}"
+{{- if .Values.resources.enabled }}
+        resources:
+          requests:
+            cpu: "{{ .Values.resources.cpu.request }}"
+            memory: "{{ .Values.resources.memory.request }}"
+          limits:
+            cpu: "{{ .Values.resources.cpu.limit }}"
+            memory: "{{ .Values.resources.memory.limit }}"
+{{- end }}
+        args:
+          - "--config"
+          - "/etc/aigent/aigent.yaml"
+{{- if .Values.deployment.args }}
+          {{- range .Values.deployment.args }}
+          - {{ . | quote }}
+          {{- end }}
+{{- end }}
+        env:
+          - name: INSTANCE_ID
+            valueFrom:
+              configMapKeyRef:
+                name: {{ .Release.Name }}-ident
+                key: instance_uid
+          - name: CT_ROLE
+            value: "aigent"
+        volumeMounts:
+        - name: config
+          mountPath: /etc/aigent
+          readOnly: true
+        ports:
+          - name: otelhttp
+            containerPort: {{ .Values.ports.otelhttp }}
+          - name: otelgrpc
+            containerPort: {{ .Values.ports.otelgrpc }}
+          - name: tallyman
+            containerPort: {{ .Values.ports.tallyman }}
+      volumes:
+      - name: config
+        configMap:
+          name: {{ .Release.Name }}-config

@@ -1,0 +1,51 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-http
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "aigent.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.otelhttp.type }}
+  ports:
+    - port: {{ .Values.ports.otelhttp }}
+      targetPort: otelhttp
+      protocol: TCP
+      name: otelhttp
+  selector:
+    {{- include "aigent.selectorLabels" . | nindent 4 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-grpc
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "aigent.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.otelgrpc.type }}
+  ports:
+    - port: {{ .Values.ports.otelgrpc }}
+      targetPort: otelgrpc
+      protocol: TCP
+      name: otelgrpc
+  selector:
+    {{- include "aigent.selectorLabels" . | nindent 4 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-tally
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "aigent.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.tallyman.type }}
+  ports:
+    - port: {{ .Values.ports.tallyman }}
+      targetPort: tallyman
+      protocol: TCP
+      name: tallyman
+  selector:
+    {{- include "aigent.selectorLabels" . | nindent 4 }}

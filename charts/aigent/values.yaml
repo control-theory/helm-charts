@@ -1,0 +1,68 @@
+# REQUIRED: Deployment environment (e.g., "dev", "stage", "prod")
+environment: ""
+
+# REQUIRED: Kubernetes cluster name (e.g., "demo-cluster")
+cluster: ""
+
+# Container image configuration
+image:
+  registry: controltheory
+  repository: aigent
+  pullPolicy: Always
+  # Image tag - override this to use different builds (e.g., "latest", "v1.0.0", "stage")
+  tag: ""  # If empty, defaults to Chart appVersion
+
+# Deployment configuration
+deployment:
+  replicas: 1
+  args:
+    - "--debug"
+    - "start"
+
+# Resource limits and requests
+resources:
+  enabled: true
+  cpu:
+    request: 100m
+    limit: 250m
+  memory:
+    request: 500Mi
+    limit: 1Gi
+
+# Service account
+serviceAccount:
+  create: true
+  name: ""  # If not set, a name is generated using the release name
+
+# Port configuration
+ports:
+  otelhttp: 1757
+  otelgrpc: 1758
+  pprof: 1958
+  tallyman: 7758
+
+# Service configuration
+service:
+  otelhttp:
+    type: ClusterIP
+  otelgrpc:
+    type: ClusterIP
+  tallyman:
+    type: ClusterIP
+
+# Autoscaling
+autoscaling:
+  enabled: false
+
+# Gateway mode - enables full collector capabilities
+# When enabled: k8s events collection, full processor chains, k8s metadata enrichment
+# When disabled: minimal processing, receives pre-processed data
+gateway:
+  enabled: false
+
+# Butler endpoint configuration
+# REQUIRED: Full butler address in format: butler.<namespace>.<environment>.controltheory.com:443
+# Example: butler.oapwf2hny.stage.controltheory.com:443
+butler:
+  endpoint: ""
+  useTLS: true
