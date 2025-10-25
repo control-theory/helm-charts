@@ -14,6 +14,16 @@ entries:
   aigent:
   - apiVersion: v2
     appVersion: 0.3.0
+    created: "2025-10-25T00:02:26.497690562Z"
+    description: ControlTheory AIgent - OpenTelemetry collector with log analysis
+    digest: d3eeac61ac878615377e563cbce825e33e918cc253aa2e094065e60cb1a638f5
+    name: aigent
+    type: application
+    urls:
+    - https://github.com/control-theory/helm-charts/releases/download/aigent-1.0.2/aigent-1.0.2.tgz
+    version: 1.0.2
+  - apiVersion: v2
+    appVersion: 0.3.0
     created: "2025-10-24T18:45:42.408728055Z"
     description: ControlTheory AIgent - OpenTelemetry collector with log analysis
     digest: 96e8599ef3cf50659b13a2398df37c793bb2f7a4da851ffdd2014c5676ac7811
@@ -134,4 +144,4 @@ entries:
     urls:
     - https://github.com/control-theory/helm-charts/releases/download/k8s-agent-0.42.0/k8s-agent-0.42.0.tgz
     version: 0.42.0
-generated: "2025-10-24T18:45:42.40874092Z"
+generated: "2025-10-25T00:02:26.497719816Z"
