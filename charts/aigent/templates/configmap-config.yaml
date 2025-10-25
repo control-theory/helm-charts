@@ -87,9 +87,11 @@ data:
               - from: connection
 
       # Resource detection processor
+      # override: false ensures we don't overwrite attributes from upstream collectors
       resourcedetection:
         detectors: [env, system]
         timeout: 5s
+        override: false
 
     exporters:
       debug:

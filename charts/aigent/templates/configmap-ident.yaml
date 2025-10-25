@@ -1,9 +1,11 @@
+{{- $configMapName := printf "%s-ident" .Release.Name }}
+{{- $existing := lookup "v1" "ConfigMap" .Release.Namespace $configMapName }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ .Release.Name }}-ident
+  name: {{ $configMapName }}
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "aigent.labels" . | nindent 4 }}
 data:
-  instance_uid: {{ .Release.Namespace | quote }}
+  instance_uid: {{ if $existing }}{{ index $existing.data "instance_uid" }}{{ else }}{{ uuidv4 }}{{ end }}
