@@ -39,28 +39,109 @@ data:
             value: {{ .Values.cluster }}
             action: upsert
 
-      # Transform k8s events to add severity information
-      transform/k8sevents:
+      # Transform k8s events to add severity information and format body
+      transform/k8sobjects:
+        error_mode: ignore
         log_statements:
           - context: log
             statements:
-              - set(severity_text, "INFO")
-              - set(severity_number, 9)
+              # Capture context from Event "regarding" section (in body["object"])
+              - set(attributes["k8s.regarding.kind"], body["object"]["regarding"]["kind"])
+              - set(attributes["k8s.regarding.name"], body["object"]["regarding"]["name"])
+              - set(attributes["k8s.regarding.namespace"], body["object"]["regarding"]["namespace"])
+
+              # Promote to resource attributes if available
+              - set(resource.attributes["k8s.namespace.name"], body["object"]["regarding"]["namespace"]) where body["object"]["regarding"]["namespace"] != nil
+              - set(resource.attributes["k8s.pod.name"], body["object"]["regarding"]["name"]) where body["object"]["regarding"]["kind"] == "Pod"
+              - set(resource.attributes["k8s.node.name"], body["object"]["regarding"]["name"]) where body["object"]["regarding"]["kind"] == "Node"
+              - set(resource.attributes["k8s.deployment.name"], body["object"]["regarding"]["name"]) where body["object"]["regarding"]["kind"] == "Deployment"
+              - set(resource.attributes["k8s.job.name"], body["object"]["regarding"]["name"]) where body["object"]["regarding"]["kind"] == "Job"
+              - set(resource.attributes["k8s.cronjob.name"], body["object"]["regarding"]["name"]) where body["object"]["regarding"]["kind"] == "CronJob"
+
+              # Optionally derive workload name if it's a ReplicaSet event
+              # Note: ReplicaSet names are formatted as <deployment-name>-<hash>
+              # First copy the name, then strip the hash suffix using replace_pattern
+              - set(resource.attributes["k8s.deployment.name"], body["object"]["regarding"]["name"]) where body["object"]["regarding"]["kind"] == "ReplicaSet"
+              - replace_pattern(resource.attributes["k8s.deployment.name"], "-[^-]+$$", "") where body["object"]["regarding"]["kind"] == "ReplicaSet"
+
+              # Additional event metadata attributes
+              - set(attributes["k8s.event.type"], body["object"]["type"])
+              - set(attributes["k8s.event.reason"], body["object"]["reason"])
+              - set(attributes["k8s.event.count"], body["object"]["deprecatedCount"])
+              - set(attributes["k8s.event.action"], body["object"]["action"])
+              - set(attributes["k8s.event.reportingComponent"], body["object"]["reportingController"])
+
+              # Severity based on event type
+              - set(severity_text, "WARNING") where body["object"]["type"] == "Warning"
+              - set(severity_number, 13) where body["object"]["type"] == "Warning"
+              - set(severity_text, "INFO") where body["object"]["type"] != "Warning"
+              - set(severity_number, 9) where body["object"]["type"] != "Warning"
+
+              # Model-readable message: reason, note, then logfmt fields
+              - set(body, Concat([
+                  body["object"]["reason"], " - ", body["object"]["note"],
+                  " kind=", body["object"]["regarding"]["kind"],
+                  " name=", body["object"]["regarding"]["name"],
+                  " namespace=", body["object"]["regarding"]["namespace"],
+                  " type=", body["object"]["type"],
+                  " action=", body["object"]["action"],
+                  " reportingController=", body["object"]["reportingController"],
+                  " count=", String(body["object"]["deprecatedCount"])
+                ], ""))
+
+      # Derive service.name from k8s resource attributes with intelligent fallback
+      transform/derive-service-name:
         error_mode: ignore
+        log_statements:
+          - context: resource
+            statements:
+              # Skip if service.name already exists
+              - set(resource.attributes["service.name"],
+                    resource.attributes["k8s.deployment.name"])
+                where resource.attributes["service.name"] == nil and resource.attributes["k8s.deployment.name"] != nil
 
-      # Add service.name as "kubernetes" if not present for k8s events
-      resource/k8sevents:
-        attributes:
-          - key: service.name
-            value: "kubernetes"
-            action: insert
+              - set(resource.attributes["service.name"],
+                    resource.attributes["k8s.cronjob.name"])
+                where resource.attributes["service.name"] == nil and resource.attributes["k8s.cronjob.name"] != nil
 
-      # Add service.name from k8s.deployment.name if service.name is missing
-      resource/servicename:
-        attributes:
-          - key: service.name
-            from_attribute: k8s.deployment.name
-            action: insert
+              - set(resource.attributes["service.name"],
+                    resource.attributes["k8s.job.name"])
+                where resource.attributes["service.name"] == nil and resource.attributes["k8s.job.name"] != nil
+
+              - set(resource.attributes["service.name"],
+                    resource.attributes["k8s.statefulset.name"])
+                where resource.attributes["service.name"] == nil and resource.attributes["k8s.statefulset.name"] != nil
+
+              - set(resource.attributes["service.name"],
+                    resource.attributes["k8s.daemonset.name"])
+                where resource.attributes["service.name"] == nil and resource.attributes["k8s.daemonset.name"] != nil
+
+              # If we only have a Pod name, derive service.name by stripping hash suffix
+              # Note: Pod names are typically formatted as <deployment>-<replicaset-hash>-<pod-hash>
+              # Copy the pod name first, then strip the last two dash-separated segments
+              - set(resource.attributes["service.name"], resource.attributes["k8s.pod.name"])
+                where resource.attributes["service.name"] == nil and resource.attributes["k8s.pod.name"] != nil
+              - replace_pattern(resource.attributes["service.name"], "-[^-]+-[^-]+$$", "")
+                where resource.attributes["service.name"] != nil and resource.attributes["k8s.pod.name"] != nil
+
+              # If that fails (empty after replacement), fall back to the full pod name
+              - set(resource.attributes["service.name"], resource.attributes["k8s.pod.name"])
+                where resource.attributes["service.name"] == "" and resource.attributes["k8s.pod.name"] != nil
+
+              # For k8s events about nodes, use a special naming convention
+              - set(resource.attributes["service.name"],
+                    Concat(["k8s-node-", resource.attributes["k8s.node.name"]], ""))
+                where resource.attributes["service.name"] == nil
+                  and resource.attributes["k8s.node.name"] != nil
+                  and attributes["k8s.regarding.kind"] == "Node"
+
+              # For k8s events, use the regarding object name
+              - set(resource.attributes["service.name"], attributes["k8s.regarding.name"])
+                where resource.attributes["service.name"] == nil and attributes["k8s.regarding.name"] != nil
+
+              # Absolute last resort: use container name
+              - set(resource.attributes["service.name"], resource.attributes["k8s.container.name"])
+                where resource.attributes["service.name"] == nil and resource.attributes["k8s.container.name"] != nil
 
       # Kubernetes attributes processor
       k8sattributes:
@@ -95,6 +176,8 @@ data:
 
     exporters:
       debug:
+      debug/k8sobjects:
+        verbosity: detailed
       nop:
 
     connectors:
@@ -131,7 +214,7 @@ data:
             - otlp
           processors:
             - k8sattributes
-            - resource/servicename  # Add service.name from k8s.deployment.name if missing
+            - transform/derive-service-name  # Derive service.name from k8s resource attributes
             - resourcedetection
             - resource
           exporters:
@@ -139,18 +222,18 @@ data:
             - debug
 
         # Kubernetes events pipeline with detailed logging
-        logs/k8sevents:
+        logs/k8sobjects:
           receivers:
             - k8sobjects
           processors:
-            - transform/k8sevents  # Add severity info
-            - resource/k8sevents   # Add service.name=kubernetes if not present
-            - k8sattributes
+            - transform/k8sobjects           # Extract k8s event fields and format body
+            - k8sattributes                  # Enrich with k8s metadata
+            - transform/derive-service-name  # Derive service.name from k8s resource attributes
             - resourcedetection
             - resource
           exporters:
             - connectorbob/logs
-            - debug
+            - debug/k8sobjects
 
         # ConnectorBob output pipeline (Statler summaries)
         logs/connectorbob:
