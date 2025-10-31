@@ -77,17 +77,9 @@ data:
               - set(severity_text, "INFO") where body["object"]["type"] != "Warning"
               - set(severity_number, 9) where body["object"]["type"] != "Warning"
 
-              # Model-readable message: reason, note, then logfmt fields
+              # Model-readable message: reason, note.
               - set(body, Concat([
-                  body["object"]["reason"], " - ", body["object"]["note"],
-                  " kind=", body["object"]["regarding"]["kind"],
-                  " name=", body["object"]["regarding"]["name"],
-                  " namespace=", body["object"]["regarding"]["namespace"],
-                  " type=", body["object"]["type"],
-                  " action=", body["object"]["action"],
-                  " reportingController=", body["object"]["reportingController"],
-                  " count=", String(body["object"]["deprecatedCount"])
-                ], ""))
+                  body["object"]["reason"], " - ", body["object"]["note"]], ""))
 
       # Derive service.name from k8s resource attributes with intelligent fallback
       transform/derive-service-name:
