@@ -49,11 +49,19 @@ spec:
               configMapKeyRef:
                 name: {{ .Release.Name }}-agentid
                 key: instance_uid
+          - name: K8S_NODE_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: spec.nodeName
 {{- if .Values.deployment.controlplane }}
           - name: CONTROLPLANE_ENDPOINT
             value: "{{ .Values.deployment.controlplane.endpoint }}"
           - name: ADMISSION_TOKEN
             value: "{{ .Values.deployment.controlplane.admission_token }}"
+{{- end }}
+{{- if .Values.deployment.butler_endpoint }}
+          - name: BUTLER_ENDPOINT
+            value: "{{ .Values.deployment.butler_endpoint }}"
 {{- end }}
         {{- range $name, $value := .Values.deployment.env }}
           - name: {{ $name }}

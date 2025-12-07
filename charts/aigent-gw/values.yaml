@@ -8,6 +8,7 @@ deployment:
   controlplane:
     admission_token: "you-need-to-provide-it"
     endpoint: "ws://controlplane:4320/v1/opamp"
+  butler_endpoint: "you-need-to-provide-it"  # Butler gRPC endpoint (e.g., butler.cp123.demo.controltheory.com:443)
   args:
     - --config
     - /config.yaml
