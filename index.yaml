@@ -185,4 +185,15 @@ entries:
     urls:
     - https://github.com/control-theory/helm-charts/releases/download/k8s-agent-0.42.0/k8s-agent-0.42.0.tgz
     version: 0.42.0
-generated: "2025-12-07T20:18:55.067478296Z"
+  k8s-ds-agent:
+  - apiVersion: v2
+    appVersion: 1.1.1
+    created: "2025-12-07T21:19:53.993443381Z"
+    description: ControlTheory DaemonSet Kubernetes Agent
+    digest: 69cf51448cb1a9fdd836a00f3626e797b05a4a62d35fbd86c057e29e6821e95e
+    name: k8s-ds-agent
+    type: application
+    urls:
+    - https://github.com/control-theory/helm-charts/releases/download/k8s-ds-agent-0.44.1/k8s-ds-agent-0.44.1.tgz
+    version: 0.44.1
+generated: "2025-12-07T21:19:53.993490038Z"
