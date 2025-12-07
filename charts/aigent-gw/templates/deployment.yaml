@@ -1,0 +1,70 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "aigent-gw.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      {{- include "aigent-gw.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "aigent-gw.selectorLabels" . | nindent 8 }}
+    spec:
+{{- if .Values.serviceAccount.create }}
+      serviceAccountName: {{ .Release.Name }}-sa
+{{- end }}
+      containers:
+      - name: {{ .Release.Name }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: "{{ .Values.image.pullPolicy }}"
+{{- if .Values.resources }}
+{{- if .Values.resources.enabled }}
+        resources:
+          requests:
+            cpu: "{{ .Values.resources.cpu.request }}"
+            memory: "{{ .Values.resources.memory.request }}"
+          limits:
+            cpu: "{{ .Values.resources.cpu.limit }}"
+            memory: "{{ .Values.resources.memory.limit }}"
+{{- end }}
+{{- end }}
+{{- if .Values.deployment.args }}
+        args:
+          {{- range .Values.deployment.args }}
+          - {{ . | quote }}
+          {{- end }}
+{{- end }}
+        env:
+          - name: AGENT_TYPE
+            value: "aigent"
+          - name: AGENT_INSTANCE_ID
+            valueFrom:
+              configMapKeyRef:
+                name: {{ .Release.Name }}-agentid
+                key: instance_uid
+{{- if .Values.deployment.controlplane }}
+          - name: CONTROLPLANE_ENDPOINT
+            value: "{{ .Values.deployment.controlplane.endpoint }}"
+          - name: ADMISSION_TOKEN
+            value: "{{ .Values.deployment.controlplane.admission_token }}"
+{{- end }}
+        {{- range $name, $value := .Values.deployment.env }}
+          - name: {{ $name }}
+            value: "{{ $value }}"
+        {{- end }}
+        ports:
+          - name: otelhttp
+            containerPort: {{ .Values.service.otelhttp.port }}
+          - name: otelgrpc
+            containerPort: {{ .Values.service.otelgrpc.port }}
+{{- if .Values.deployment.nodeSelector }}
+      nodeSelector:
+        {{- toYaml .Values.deployment.nodeSelector | nindent 8 }}
+{{- end }}

@@ -52,10 +52,16 @@ spec:
                 key: instance_uid
           - name: CT_ROLE
             value: "aigent"
+        {{- range $name, $value := .Values.deployment.env }}
+          - name: {{ $name }}
+            value: "{{ $value }}"
+        {{- end }}
         volumeMounts:
         - name: config
           mountPath: /etc/aigent
           readOnly: true
+        - name: duckdb-tmpfs
+          mountPath: /tmp
         ports:
           - name: otelhttp
             containerPort: {{ .Values.ports.otelhttp }}
@@ -63,7 +69,13 @@ spec:
             containerPort: {{ .Values.ports.otelgrpc }}
           - name: tallyman
             containerPort: {{ .Values.ports.tallyman }}
+          - name: pprof
+            containerPort: {{ .Values.ports.pprof }}
       volumes:
       - name: config
         configMap:
           name: {{ .Release.Name }}-config
+      - name: duckdb-tmpfs
+        emptyDir:
+          medium: Memory
+          sizeLimit: 1Gi

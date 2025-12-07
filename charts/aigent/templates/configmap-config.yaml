@@ -24,11 +24,23 @@ data:
           - name: events
             mode: watch
             group: events.k8s.io
+{{- if .Values.gateway.includeNamespaces }}
+            namespaces:
+{{- range .Values.gateway.includeNamespaces }}
+              - {{ . }}
+{{- end }}
+{{- end }}
             exclude_watch_type:
               - DELETED
 {{- end }}
 
     processors:
+      # Batch processor for logs - reduces number of export calls and memory pressure
+      batch:
+        send_batch_size: 1000
+        timeout: 1s
+        send_batch_max_size: 2000
+
       # Add deployment environment and cluster name as resource attributes
       resource:
         attributes:
@@ -180,12 +192,32 @@ data:
       statler:
         start_server: false
         start_client: true
+        {{- $bobo := .Values.boboAPI | default dict -}}
+        {{- if and $bobo $bobo.enable }}
+        bobo_api:
+          enabled: true
+          provider: {{ $bobo.provider | default "openai" | quote }}
+          {{- $openai := $bobo.openai | default dict }}
+          openai:
+            api_key: {{ required "boboAPI.openai.apiKey is required (LiteLLM API key)" $openai.apiKey | quote }}
+            model: {{ $openai.model | default "gpt-5-nano" | quote }}
+            base_url: {{ required "boboAPI.openai.baseURL is required (e.g., http://litellm.litellm.svc.cluster.local:4000/v1)" $openai.baseURL | quote }}
+            temperature: {{ $openai.temperature | default 0.3 }}
+            max_tokens: {{ $openai.maxTokens | default 0 }}
+            max_log_samples: {{ $openai.maxLogSamples | default 100 }}
+        {{- end }}
         client:
           export_interval: 60s
           bucket_size: 60s
           max_log_samples: 1000
           max_patterns: 7
           group_by_dimensions: ["service", "deployment", "pod", "category", "phrase", "host"]
+          {{- if .Values.useChdbAccumulator }}
+          use_chdb_accumulator: true
+          {{- end }}
+          {{- if .Values.useDuckDBAccumulator }}
+          use_duckdb_accumulator: true
+          {{- end }}
           server_address: {{ required "butler.endpoint is required (e.g., butler.namespace.stage.controltheory.com:443)" .Values.butler.endpoint }}
           use_tls: {{ .Values.butler.useTLS }}
 
@@ -209,9 +241,9 @@ data:
             - transform/derive-service-name  # Derive service.name from k8s resource attributes
             - resourcedetection
             - resource
+            - batch                          # Batch logs before connectorbob to reduce ConsumeLogs calls
           exporters:
             - connectorbob/logs
-            - debug
 
         # Kubernetes events pipeline with detailed logging
         logs/k8sobjects:
@@ -223,6 +255,7 @@ data:
             - transform/derive-service-name  # Derive service.name from k8s resource attributes
             - resourcedetection
             - resource
+            - batch                          # Batch logs before connectorbob to reduce ConsumeLogs calls
           exporters:
             - connectorbob/logs
             - debug/k8sobjects
@@ -243,7 +276,7 @@ data:
             - resourcedetection
             - resource
           exporters:
-            - debug
+            - nop
 
         # Metrics pipeline with full processing
         metrics:
@@ -254,7 +287,7 @@ data:
             - resourcedetection
             - resource
           exporters:
-            - debug
+            - nop
 {{- else }}
         # Standard mode: Minimal processing for pre-processed data
         logs:
@@ -262,9 +295,9 @@ data:
             - otlp
           processors:
             - resource
+            - batch                          # Batch logs before connectorbob to reduce ConsumeLogs calls
           exporters:
             - connectorbob/logs
-            - debug
 
         # ConnectorBob output pipeline (Statler summaries)
         logs/connectorbob:
@@ -280,7 +313,7 @@ data:
           processors:
             - resource
           exporters:
-            - debug
+            - nop
 
         # Metrics pipeline with basic processing
         metrics:
@@ -289,5 +322,5 @@ data:
           processors:
             - resource
           exporters:
-            - debug
+            - nop
 {{- end }}

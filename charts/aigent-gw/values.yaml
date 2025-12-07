@@ -3,33 +3,26 @@ image:
   repository: controltheory/supervisor
   pullPolicy: Always
   tag: v1.1.0
-storageHostPath:
-  enable: true
-  path: /var/ct/agent-data
+
 deployment:
   controlplane:
     admission_token: "you-need-to-provide-it"
     endpoint: "ws://controlplane:4320/v1/opamp"
-  agent_type: ""  # "ctotel" (default) or "aigent"
-  otlp_export_endpoint: ""  # Override OTLP export destination (e.g., "aigent-gw:4317" to send to AIgent Gateway)
   args:
     - --config
     - /config.yaml
-  otel:
-    resource_attributes:
-      - deployment.environment.name: staging
+
 resources:
   enabled: true
   cpu:
     request: 100m
-    limit: 250m
+    limit: 500m
   memory:
-    request: 500Mi
-    limit: 1Gi
+    request: 512Mi
+    limit: 2Gi
 
 serviceAccount:
   create: true
-  name: otel-collector-admin
 
 service:
   otelhttp:
@@ -38,6 +31,3 @@ service:
   otelgrpc:
     type: ClusterIP
     port: 4317
-  statsd:
-    type: ClusterIP
-    port: 8125

@@ -60,6 +60,14 @@ spec:
           value: "{{ .Values.deployment.controlplane.endpoint }}"
         - name: ADMISSION_TOKEN
           value: "{{ .Values.deployment.controlplane.admission_token }}"
+{{- if .Values.deployment.agent_type }}
+        - name: AGENT_TYPE
+          value: "{{ .Values.deployment.agent_type }}"
+{{- end }}
+{{- if .Values.deployment.otlp_export_endpoint }}
+        - name: OTLP_EXPORT_ENDPOINT
+          value: "{{ .Values.deployment.otlp_export_endpoint }}"
+{{- end }}
 {{- if .Values.deployment.otel }}
 {{- if .Values.deployment.otel.resource_attributes }}
         - name: OTEL_RESOURCE_ATTRIBUTES

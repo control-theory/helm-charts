@@ -1,0 +1,6 @@
+apiVersion: v2
+name: aigent-gw
+description: ControlTheory AIgent Gateway - AI-powered log aggregation
+type: application
+version: 0.1.0
+appVersion: "1.0.0"

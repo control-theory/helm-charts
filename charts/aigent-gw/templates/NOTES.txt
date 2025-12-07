@@ -1,0 +1,11 @@
+AIgent Gateway has been installed.
+
+Release: {{ .Release.Name }}
+Namespace: {{ .Release.Namespace }}
+
+The AIgent Gateway service is available at:
+  {{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.otelgrpc.port }} (gRPC)
+  {{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.otelhttp.port }} (HTTP)
+
+To configure DaemonSet collectors to send logs to this gateway, use the OTLP exporter
+pointing to the service endpoint above.
