@@ -52,6 +52,10 @@ spec:
                 key: instance_uid
           - name: CT_ROLE
             value: "aigent"
+        {{- if .Values.butler.endpoint }}
+          - name: BUTLER_ENDPOINT
+            value: "{{ .Values.butler.endpoint }}"
+        {{- end }}
         {{- range $name, $value := .Values.deployment.env }}
           - name: {{ $name }}
             value: "{{ $value }}"
