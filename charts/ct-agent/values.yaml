@@ -2,7 +2,7 @@ replicaCount: 1
 image:
   repository: controltheory/supervisor
   pullPolicy: Always
-  tag: v1.1.0
+  tag: v1.2.0
 
 deployment:
   controlplane:
