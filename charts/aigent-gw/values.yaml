@@ -30,7 +30,7 @@ serviceAccount:
 service:
   otelhttp:
     type: ClusterIP
-    port: 4318
+    port: 1758
   otelgrpc:
     type: ClusterIP
-    port: 4317
+    port: 1757
