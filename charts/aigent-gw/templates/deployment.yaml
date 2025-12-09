@@ -63,6 +63,14 @@ spec:
           - name: BUTLER_ENDPOINT
             value: "{{ .Values.deployment.butler_endpoint }}"
 {{- end }}
+{{- if .Values.deployment.cluster_name }}
+          - name: CLUSTER_NAME
+            value: "{{ .Values.deployment.cluster_name }}"
+{{- end }}
+{{- if .Values.deployment.deployment_env }}
+          - name: DEPLOYMENT_ENV
+            value: "{{ .Values.deployment.deployment_env }}"
+{{- end }}
         {{- range $name, $value := .Values.deployment.env }}
           - name: {{ $name }}
             value: "{{ $value }}"
