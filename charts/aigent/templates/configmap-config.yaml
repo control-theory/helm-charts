@@ -200,7 +200,7 @@ data:
           {{- $openai := $bobo.openai | default dict }}
           openai:
             api_key: {{ required "boboAPI.openai.apiKey is required (LiteLLM API key)" $openai.apiKey | quote }}
-            model: {{ $openai.model | default "gpt-5-nano" | quote }}
+            model: {{ $openai.model | default "bobo-baconbits" | quote }}
             base_url: {{ required "boboAPI.openai.baseURL is required (e.g., http://litellm.litellm.svc.cluster.local:4000/v1)" $openai.baseURL | quote }}
             temperature: {{ $openai.temperature | default 0.3 }}
             max_tokens: {{ $openai.maxTokens | default 0 }}
