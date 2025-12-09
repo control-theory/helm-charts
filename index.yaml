@@ -84,6 +84,16 @@ entries:
     version: 1.0.0
   aigent-gw:
   - apiVersion: v2
+    appVersion: 1.2.1
+    created: "2025-12-09T02:56:37.785080269Z"
+    description: ControlTheory AIgent Gateway - AI-powered log aggregation
+    digest: b778a2a7a3a0cc1ad8a00b18f24125d2c1ee5e883f9501f69e179c305e7e8e41
+    name: aigent-gw
+    type: application
+    urls:
+    - https://github.com/control-theory/helm-charts/releases/download/aigent-gw-0.1.4/aigent-gw-0.1.4.tgz
+    version: 0.1.4
+  - apiVersion: v2
     appVersion: 1.2.0
     created: "2025-12-09T00:33:24.190928095Z"
     description: ControlTheory AIgent Gateway - AI-powered log aggregation
@@ -124,6 +134,16 @@ entries:
     - https://github.com/control-theory/helm-charts/releases/download/aigent-gw-0.1.0/aigent-gw-0.1.0.tgz
     version: 0.1.0
   ct-agent:
+  - apiVersion: v2
+    appVersion: 1.2.1
+    created: "2025-12-09T02:56:37.935415776Z"
+    description: ControlTheory Kubernetes Agent
+    digest: 1b5646068d3fd89e75fef7fc250369bc7a38839ffce7bd1359973bb3cb8a0b8b
+    name: ct-agent
+    type: application
+    urls:
+    - https://github.com/control-theory/helm-charts/releases/download/ct-agent-0.1.7/ct-agent-0.1.7.tgz
+    version: 0.1.7
   - apiVersion: v2
     appVersion: 1.2.0
     created: "2025-12-08T19:40:41.867822435Z"
@@ -247,6 +267,16 @@ entries:
     version: 0.42.0
   k8s-ds-agent:
   - apiVersion: v2
+    appVersion: 1.2.1
+    created: "2025-12-09T02:56:38.102599049Z"
+    description: ControlTheory DaemonSet Kubernetes Agent
+    digest: f73d9edb099a9976ee9d97fa367987c1a2dc9d521e5b12abdfa11a1ec33720a9
+    name: k8s-ds-agent
+    type: application
+    urls:
+    - https://github.com/control-theory/helm-charts/releases/download/k8s-ds-agent-0.44.3/k8s-ds-agent-0.44.3.tgz
+    version: 0.44.3
+  - apiVersion: v2
     appVersion: 1.2.0
     created: "2025-12-08T19:40:42.048995276Z"
     description: ControlTheory DaemonSet Kubernetes Agent
@@ -266,4 +296,4 @@ entries:
     urls:
     - https://github.com/control-theory/helm-charts/releases/download/k8s-ds-agent-0.44.1/k8s-ds-agent-0.44.1.tgz
     version: 0.44.1
-generated: "2025-12-09T00:33:24.190983668Z"
+generated: "2025-12-09T02:56:38.102700158Z"
