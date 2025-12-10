@@ -75,11 +75,18 @@ spec:
           - name: {{ $name }}
             value: "{{ $value }}"
         {{- end }}
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
         ports:
           - name: otelhttp
             containerPort: {{ .Values.service.otelhttp.port }}
           - name: otelgrpc
             containerPort: {{ .Values.service.otelgrpc.port }}
+      volumes:
+      - name: tmp
+        emptyDir:
+          sizeLimit: 2Gi
 {{- if .Values.deployment.nodeSelector }}
       nodeSelector:
         {{- toYaml .Values.deployment.nodeSelector | nindent 8 }}
