@@ -1,0 +1,14 @@
+AIgent DaemonSet has been installed.
+
+Release: {{ .Release.Name }}
+Namespace: {{ .Release.Namespace }}
+
+The AIgent DaemonSet runs on each node in the cluster, collecting and
+aggregating logs locally before sending to Butler.
+
+Service endpoint (for internal node communication):
+  {{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.otelgrpc.port }} (gRPC)
+  {{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.otelhttp.port }} (HTTP)
+
+To check running pods:
+  kubectl get pods -n {{ .Release.Namespace }} -l app.kubernetes.io/name=aigent-ds
