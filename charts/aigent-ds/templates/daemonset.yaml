@@ -47,7 +47,7 @@ spec:
         env:
           - name: AGENT_TYPE
             value: "aigent"
-          - name: AGENT_INSTANCE_ID
+          - name: AGENT_BASE_ID
             valueFrom:
               configMapKeyRef:
                 name: {{ .Release.Name }}-agentid
