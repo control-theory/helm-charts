@@ -3,4 +3,4 @@ name: aigent-ds
 description: ControlTheory AIgent DaemonSet - AI-powered log aggregation per node
 type: application
 version: 0.1.4
-appVersion: "v1.2.4"
+appVersion: "v1.2.5"
