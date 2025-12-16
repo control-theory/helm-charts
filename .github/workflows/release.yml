@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
   release:
@@ -22,6 +23,41 @@ jobs:
         run: |
           git config user.name "$GITHUB_ACTOR"
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
+      - name: Auto-bump chart version if appVersion changed
+        run: |
+          for chart in aigent-ds aigent-gw; do
+            chart_yaml="charts/$chart/Chart.yaml"
+            if [ ! -f "$chart_yaml" ]; then
+              continue
+            fi
+
+            version=$(grep '^version:' "$chart_yaml" | awk '{print $2}')
+            app_version=$(grep '^appVersion:' "$chart_yaml" | sed 's/appVersion: *"\(.*\)"/\1/')
+
+            # Check if this exact version+appVersion combo was already released
+            release_tag="${chart}-${version}"
+            if gh release view "$release_tag" &>/dev/null; then
+              # Release exists - bump patch version
+              major=$(echo "$version" | cut -d. -f1)
+              minor=$(echo "$version" | cut -d. -f2)
+              patch=$(echo "$version" | cut -d. -f3)
+              new_patch=$((patch + 1))
+              new_version="${major}.${minor}.${new_patch}"
+
+              echo "Bumping $chart version: $version -> $new_version (appVersion: $app_version)"
+              sed -i "s/^version: .*/version: $new_version/" "$chart_yaml"
+              git add "$chart_yaml"
+              git commit -m "Auto-bump $chart chart version to $new_version"
+            fi
+          done
+
+          # Push any version bumps
+          if [ "$(git rev-parse HEAD)" != "$(git rev-parse origin/main)" ]; then
+            git push
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.7.0
