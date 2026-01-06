@@ -3,6 +3,16 @@ entries:
   aigent-ds:
   - apiVersion: v2
     appVersion: v1.2.6
+    created: "2026-01-06T21:48:29.616897673Z"
+    description: ControlTheory AIgent DaemonSet - AI-powered log aggregation per node
+    digest: ac1db9346552481f372f7afe9d5e4e29c1fa23223955ede42ea000743946a87f
+    name: aigent-ds
+    type: application
+    urls:
+    - https://github.com/control-theory/helm-charts/releases/download/aigent-ds-0.1.8/aigent-ds-0.1.8.tgz
+    version: 0.1.8
+  - apiVersion: v2
+    appVersion: v1.2.6
     created: "2025-12-29T23:20:10.272988733Z"
     description: ControlTheory AIgent DaemonSet - AI-powered log aggregation per node
     digest: f538d0ffbe6d7bcbdc395c3ce193eabdf6db46370c5ccc3392044aa788f27ec3
@@ -72,6 +82,16 @@ entries:
     - https://github.com/control-theory/helm-charts/releases/download/aigent-ds-0.1.0/aigent-ds-0.1.0.tgz
     version: 0.1.0
   aigent-gw:
+  - apiVersion: v2
+    appVersion: v1.2.6
+    created: "2026-01-06T21:48:29.728916959Z"
+    description: ControlTheory AIgent Gateway - AI-powered log aggregation
+    digest: 0b22a8b9c3042454fd6f91d36bbbc67674d7132675adc265e138b7908c024a07
+    name: aigent-gw
+    type: application
+    urls:
+    - https://github.com/control-theory/helm-charts/releases/download/aigent-gw-0.1.13/aigent-gw-0.1.13.tgz
+    version: 0.1.13
   - apiVersion: v2
     appVersion: v1.2.6
     created: "2025-12-29T23:20:10.491636235Z"
@@ -202,4 +222,15 @@ entries:
     urls:
     - https://github.com/control-theory/helm-charts/releases/download/aigent-gw-0.1.0/aigent-gw-0.1.0.tgz
     version: 0.1.0
-generated: "2025-12-29T23:20:10.491760076Z"
+  k8s-ds-agent:
+  - apiVersion: v2
+    appVersion: 1.2.1
+    created: "2026-01-06T21:48:29.871203179Z"
+    description: ControlTheory DaemonSet Kubernetes Agent
+    digest: 4cdc896a2b9a06b71e87eaae27477b2517c2ef6313c00e5d67f855cff5074817
+    name: k8s-ds-agent
+    type: application
+    urls:
+    - https://github.com/control-theory/helm-charts/releases/download/k8s-ds-agent-0.45.0/k8s-ds-agent-0.45.0.tgz
+    version: 0.45.0
+generated: "2026-01-06T21:48:29.871298657Z"
