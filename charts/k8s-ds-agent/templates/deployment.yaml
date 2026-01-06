@@ -16,6 +16,22 @@ spec:
 {{- if .Values.serviceAccount.create }}
       serviceAccountName: {{ .Values.serviceAccount.name }}
 {{- end }}
+{{- if .Values.priorityClassName }}
+      priorityClassName: {{ .Values.priorityClassName }}
+{{- end }}
+{{- if .Values.tolerateAllTaints }}
+      tolerations:
+        - operator: "Exists"
+{{- else if gt (len .Values.tolerateTaintKeys) 0 }}
+      tolerations:
+        {{- range .Values.tolerateTaintKeys }}
+        - key: {{ . | quote }}
+          operator: "Exists"
+        {{- end }}
+{{- else if gt (len .Values.tolerations) 0 }}
+      tolerations:
+        {{- toYaml .Values.tolerations | nindent 8 }}
+{{- end }}
       volumes:
 {{- if .Values.storageHostPath.enable }}
         - name: storage-volume

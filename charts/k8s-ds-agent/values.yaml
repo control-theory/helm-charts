@@ -27,6 +27,37 @@ resources:
     request: 500Mi
     limit: 1Gi
 
+# Node Scheduling
+#
+# tolerateAllTaints: true (default) - Schedule on ALL nodes regardless of taints
+# tolerateAllTaints: false          - Only schedule on nodes without taints
+#
+# To tolerate specific taints only, set tolerateAllTaints=false and list keys:
+#   tolerateTaintKeys: ["only-gpu-workloads", "dedicated"]
+#
+# For full control, set tolerateAllTaints=false and use tolerations directly:
+#   tolerations:
+#     - key: "my-taint"
+#       operator: "Equal"
+#       value: "my-value"
+#       effect: "NoSchedule"
+#
+tolerateAllTaints: true
+tolerateTaintKeys: []
+tolerations: []
+
+# Priority Class
+#
+# For DaemonSets that must run on every node, use a high priority to ensure scheduling
+# even when nodes are under resource pressure. The agent can preempt lower-priority pods.
+#
+# Common values:
+#   "system-node-critical"    - Highest priority, for node-critical infrastructure (recommended)
+#   "system-cluster-critical" - High priority, for cluster-critical services
+#   ""                        - No priority class (default, not recommended for production)
+#
+priorityClassName: ""
+
 serviceAccount:
   create: true
   name: otel-collector-admin
