@@ -1,6 +1,5 @@
 image:
   repository: controltheory/supervisor
-  tag: 9414c101
   pullPolicy: Always
   # tag: override to use a different image than Chart.appVersion
 
