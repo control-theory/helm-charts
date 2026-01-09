@@ -1,6 +1,0 @@
-apiVersion: v2
-appVersion: 1.2.1
-description: ControlTheory DaemonSet Kubernetes Agent
-name: k8s-ds-agent
-type: application
-version: 0.45.0
