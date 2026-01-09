@@ -14,6 +14,16 @@ deployment:
   args:
     - --config
     - /config.yaml
+  nodeSelector: {}
+  env: {}
+
+# Node Scheduling - schedule on ALL nodes by default
+tolerateAllTaints: true
+tolerateTaintKeys: []
+tolerations: []
+
+# Priority Class - use system-cluster-critical for cluster-level services
+priorityClassName: "system-cluster-critical"
 
 resources:
   enabled: true
