@@ -1,6 +1,0 @@
-apiVersion: v2
-name: ct-agent
-description: ControlTheory Kubernetes Agent
-type: application
-version: 0.1.7
-appVersion: "1.2.1"
