@@ -1,0 +1,21 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "aigent-cluster.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.otelgrpc.type }}
+  selector:
+    {{- include "aigent-cluster.selectorLabels" . | nindent 4 }}
+  ports:
+    - name: otelhttp
+      protocol: TCP
+      port: {{ .Values.service.otelhttp.port }}
+      targetPort: {{ .Values.service.otelhttp.port }}
+    - name: otelgrpc
+      protocol: TCP
+      port: {{ .Values.service.otelgrpc.port }}
+      targetPort: {{ .Values.service.otelgrpc.port }}

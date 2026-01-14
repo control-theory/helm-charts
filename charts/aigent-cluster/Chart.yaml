@@ -1,0 +1,6 @@
+apiVersion: v2
+name: aigent-cluster
+description: ControlTheory AIgent Cluster - captures k8s events and sends to Butler
+type: application
+version: 0.2.1
+appVersion: "v1.3.9"

@@ -1,0 +1,11 @@
+{{- $configMapName := printf "%s-agentid" .Release.Name }}
+{{- $existing := lookup "v1" "ConfigMap" .Release.Namespace $configMapName }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $configMapName }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "aigent-cluster.labels" . | nindent 4 }}
+data:
+  instance_uid: {{ if $existing }}{{ index $existing.data "instance_uid" }}{{ else }}{{ uuidv4 }}{{ end }}
