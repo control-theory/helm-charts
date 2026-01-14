@@ -17,21 +17,16 @@ deployment:
   nodeSelector: {}
   env: {}
 
-# Node Scheduling - schedule on ALL nodes by default
+# Node Scheduling - any node that has capacity
 tolerateAllTaints: true
 tolerateTaintKeys: []
 tolerations: []
 
-# Priority Class - use system-cluster-critical for cluster-level services
-priorityClassName: "system-cluster-critical"
-
 resources:
   enabled: true
   cpu:
-    request: 100m
     limit: 500m
   memory:
-    request: 512Mi
     limit: 2Gi
 
 serviceAccount:
