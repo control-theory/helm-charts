@@ -108,12 +108,6 @@ spec:
         - name: varlog
           mountPath: /var/log
           readOnly: true
-        - name: dockerlogs
-          mountPath: /var/lib/docker/containers
-          readOnly: true
-        - name: containerdlogs
-          mountPath: /var/log/pods
-          readOnly: true
         ports:
           - name: otelhttp
             containerPort: {{ .Values.service.otelhttp.port }}
@@ -126,12 +120,6 @@ spec:
       - name: varlog
         hostPath:
           path: /var/log
-      - name: dockerlogs
-        hostPath:
-          path: /var/lib/docker/containers
-      - name: containerdlogs
-        hostPath:
-          path: /var/log/pods
 {{- if .Values.daemonset.nodeSelector }}
       nodeSelector:
         {{- toYaml .Values.daemonset.nodeSelector | nindent 8 }}

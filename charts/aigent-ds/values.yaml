@@ -22,7 +22,7 @@ tolerateTaintKeys: []
 tolerations: []
 
 resources:
-  enabled: true
+  enabled: false
   cpu:
     limit: 500m
   memory:
