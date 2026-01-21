@@ -3,4 +3,4 @@ name: aigent-cluster
 description: ControlTheory AIgent Cluster - captures k8s events and sends to Butler
 type: application
 version: 0.2.4
-appVersion: "v1.3.9"
+appVersion: "v1.3.10"

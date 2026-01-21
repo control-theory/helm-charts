@@ -3,4 +3,4 @@ name: aigent-gw
 description: ControlTheory AIgent Gateway - AI-powered log aggregation
 type: application
 version: 0.2.4
-appVersion: "v1.3.9"
+appVersion: "v1.3.10"
