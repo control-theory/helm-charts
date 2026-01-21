@@ -2,6 +2,16 @@ apiVersion: v1
 entries:
   aigent-cluster:
   - apiVersion: v2
+    appVersion: v1.3.10
+    created: "2026-01-21T20:26:29.32744431Z"
+    description: ControlTheory AIgent Cluster - captures k8s events and sends to Butler
+    digest: 4cb94d5bd0a49173f24452292bccbd5a0abf1d1df5bbc23d9f130242987181e8
+    name: aigent-cluster
+    type: application
+    urls:
+    - https://github.com/control-theory/helm-charts/releases/download/aigent-cluster-0.2.4/aigent-cluster-0.2.4.tgz
+    version: 0.2.4
+  - apiVersion: v2
     appVersion: v1.3.9
     created: "2026-01-14T23:42:08.956057136Z"
     description: ControlTheory AIgent Cluster - captures k8s events and sends to Butler
@@ -32,6 +42,16 @@ entries:
     - https://github.com/control-theory/helm-charts/releases/download/aigent-cluster-0.2.1/aigent-cluster-0.2.1.tgz
     version: 0.2.1
   aigent-ds:
+  - apiVersion: v2
+    appVersion: v1.3.10
+    created: "2026-01-21T20:26:29.56274419Z"
+    description: ControlTheory AIgent DaemonSet - AI-powered log aggregation per node
+    digest: 6c1c2f3a169a04f0e27967aff22df70764e46b529e4949e458d435649a729a0f
+    name: aigent-ds
+    type: application
+    urls:
+    - https://github.com/control-theory/helm-charts/releases/download/aigent-ds-0.2.4/aigent-ds-0.2.4.tgz
+    version: 0.2.4
   - apiVersion: v2
     appVersion: v1.3.9
     created: "2026-01-14T23:42:09.113591871Z"
@@ -124,6 +144,16 @@ entries:
     version: 0.1.6
   aigent-gw:
   - apiVersion: v2
+    appVersion: v1.3.10
+    created: "2026-01-21T20:26:29.799946246Z"
+    description: ControlTheory AIgent Gateway - AI-powered log aggregation
+    digest: 9dadccba8e39864c1dcd53ed82f4839d67323e63986afa4acf0b3de4f69103ce
+    name: aigent-gw
+    type: application
+    urls:
+    - https://github.com/control-theory/helm-charts/releases/download/aigent-gw-0.2.4/aigent-gw-0.2.4.tgz
+    version: 0.2.4
+  - apiVersion: v2
     appVersion: v1.3.9
     created: "2026-01-14T23:42:09.265450668Z"
     description: ControlTheory AIgent Gateway - AI-powered log aggregation
@@ -203,4 +233,4 @@ entries:
     urls:
     - https://github.com/control-theory/helm-charts/releases/download/aigent-gw-0.1.12/aigent-gw-0.1.12.tgz
     version: 0.1.12
-generated: "2026-01-14T23:42:09.265571245Z"
+generated: "2026-01-21T20:26:29.800034911Z"
