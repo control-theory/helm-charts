@@ -38,3 +38,6 @@ service:
   otelgrpc:
     type: ClusterIP
     port: 1757
+
+hostPort:
+  enabled: false  # Set true to expose ports on node (for node-level telemetry collection)
