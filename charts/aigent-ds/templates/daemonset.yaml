@@ -111,8 +111,14 @@ spec:
         ports:
           - name: otelhttp
             containerPort: {{ .Values.service.otelhttp.port }}
+            {{- if .Values.hostPort.enabled }}
+            hostPort: {{ .Values.service.otelhttp.port }}
+            {{- end }}
           - name: otelgrpc
             containerPort: {{ .Values.service.otelgrpc.port }}
+            {{- if .Values.hostPort.enabled }}
+            hostPort: {{ .Values.service.otelgrpc.port }}
+            {{- end }}
       volumes:
       - name: tmp
         emptyDir:
