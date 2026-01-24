@@ -44,6 +44,16 @@ entries:
   aigent-ds:
   - apiVersion: v2
     appVersion: v1.3.10
+    created: "2026-01-24T01:02:02.280495729Z"
+    description: ControlTheory AIgent DaemonSet - AI-powered log aggregation per node
+    digest: b5746490f96eb23fd12b459a6e4960beff139e6d8974d5699d3d6e5f9c7aa6e2
+    name: aigent-ds
+    type: application
+    urls:
+    - https://github.com/control-theory/helm-charts/releases/download/aigent-ds-0.2.5/aigent-ds-0.2.5.tgz
+    version: 0.2.5
+  - apiVersion: v2
+    appVersion: v1.3.10
     created: "2026-01-21T20:26:29.56274419Z"
     description: ControlTheory AIgent DaemonSet - AI-powered log aggregation per node
     digest: 6c1c2f3a169a04f0e27967aff22df70764e46b529e4949e458d435649a729a0f
@@ -145,6 +155,16 @@ entries:
   aigent-gw:
   - apiVersion: v2
     appVersion: v1.3.10
+    created: "2026-01-24T01:02:02.500087205Z"
+    description: ControlTheory AIgent Gateway - AI-powered log aggregation
+    digest: 64b58045a880648f4335802dbd3205b3883f0fa35b7dafd0af72b697d70d8d8e
+    name: aigent-gw
+    type: application
+    urls:
+    - https://github.com/control-theory/helm-charts/releases/download/aigent-gw-0.2.5/aigent-gw-0.2.5.tgz
+    version: 0.2.5
+  - apiVersion: v2
+    appVersion: v1.3.10
     created: "2026-01-21T20:26:29.799946246Z"
     description: ControlTheory AIgent Gateway - AI-powered log aggregation
     digest: 9dadccba8e39864c1dcd53ed82f4839d67323e63986afa4acf0b3de4f69103ce
@@ -233,4 +253,4 @@ entries:
     urls:
     - https://github.com/control-theory/helm-charts/releases/download/aigent-gw-0.1.12/aigent-gw-0.1.12.tgz
     version: 0.1.12
-generated: "2026-01-21T20:26:29.800034911Z"
+generated: "2026-01-24T01:02:02.500274114Z"
