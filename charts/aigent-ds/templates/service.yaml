@@ -8,6 +8,7 @@ metadata:
     {{- include "aigent-ds.labels" . | nindent 4 }}
 spec:
   type: {{ .Values.service.otelgrpc.type }}
+  internalTrafficPolicy: Local
   selector:
     {{- include "aigent-ds.selectorLabels" . | nindent 4 }}
   ports:
