@@ -90,10 +90,6 @@ spec:
           - name: BUTLER_ENDPOINT
             value: "{{ .Values.daemonset.butler_endpoint }}"
 {{- end }}
-{{- if .Values.daemonset.org_api_token }}
-          - name: CT_ORG_API_TOKEN
-            value: "{{ .Values.daemonset.org_api_token }}"
-{{- end }}
 {{- if .Values.daemonset.org_api_endpoint }}
           - name: CT_ORG_API_ENDPOINT
             value: "{{ .Values.daemonset.org_api_endpoint }}"

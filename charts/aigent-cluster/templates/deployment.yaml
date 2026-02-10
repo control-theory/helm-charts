@@ -83,10 +83,6 @@ spec:
           - name: BUTLER_ENDPOINT
             value: "{{ .Values.deployment.butler_endpoint }}"
 {{- end }}
-{{- if .Values.deployment.org_api_token }}
-          - name: CT_ORG_API_TOKEN
-            value: "{{ .Values.deployment.org_api_token }}"
-{{- end }}
 {{- if .Values.deployment.org_api_endpoint }}
           - name: CT_ORG_API_ENDPOINT
             value: "{{ .Values.deployment.org_api_endpoint }}"
