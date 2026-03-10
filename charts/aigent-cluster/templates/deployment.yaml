@@ -79,10 +79,6 @@ spec:
           - name: ADMISSION_TOKEN
             value: "{{ .Values.deployment.controlplane.admission_token }}"
 {{- end }}
-{{- if .Values.deployment.butler_endpoint }}
-          - name: BUTLER_ENDPOINT
-            value: "{{ .Values.deployment.butler_endpoint }}"
-{{- end }}
 {{- if .Values.deployment.org_api_endpoint }}
           - name: CT_ORG_API_ENDPOINT
             value: "{{ .Values.deployment.org_api_endpoint }}"
