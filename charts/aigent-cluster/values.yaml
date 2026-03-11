@@ -11,8 +11,9 @@ deployment:
   cluster_name: "" # Kubernetes cluster name for resource attribution
   deployment_env: "" # Deployment environment (e.g., prod, staging, dev)
   args:
-    - --config
-    - /config.yaml
+    - start
+    - --role
+    - "aigent:k8sCluster"
   nodeSelector: {}
   env: {}
 
