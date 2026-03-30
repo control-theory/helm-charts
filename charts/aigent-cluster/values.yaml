@@ -11,6 +11,7 @@ deployment:
   butler_endpoint: "you-need-to-provide-it" # Butler gRPC endpoint (e.g., butler.cp123.demo.controltheory.com:443)
   cluster_name: "" # Kubernetes cluster name for resource attribution
   deployment_env: "" # Deployment environment (e.g., prod, staging, dev)
+  source_id: "" # Required source ID
   args:
     - --config
     - /config.yaml
