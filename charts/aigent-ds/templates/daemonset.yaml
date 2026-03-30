@@ -90,6 +90,10 @@ spec:
           - name: CT_ORG_API_ENDPOINT
             value: "{{ .Values.daemonset.org_api_endpoint }}"
 {{- end }}
+{{- if .Values.daemonset.org_dns_id }}
+          - name: ORG_DNS_ID
+            value: "{{ .Values.daemonset.org_dns_id }}"
+{{- end }}
 {{- if .Values.daemonset.cluster_name }}
           - name: CLUSTER_NAME
             value: "{{ .Values.daemonset.cluster_name }}"
@@ -97,6 +101,14 @@ spec:
 {{- if .Values.daemonset.deployment_env }}
           - name: DEPLOYMENT_ENV
             value: "{{ .Values.daemonset.deployment_env }}"
+{{- end }}
+{{- if .Values.daemonset.data_endpoint }}
+          - name: CT_BUTLER_ENDPOINT
+            value: "{{ .Values.daemonset.data_endpoint }}"
+{{- end }}
+{{- if .Values.daemonset.data_tls }}
+          - name: CT_USE_TLS
+            value: "{{ .Values.daemonset.data_tls }}"
 {{- end }}
         {{- range $name, $value := .Values.daemonset.env }}
           - name: {{ $name }}
