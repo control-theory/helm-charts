@@ -9,6 +9,7 @@ daemonset:
     endpoint: "ws://controlplane:4320/v1/opamp"
   cluster_name: "" # Kubernetes cluster name for resource attribution
   deployment_env: "" # Deployment environment (e.g., prod, staging, dev)
+  source_id: "" # Required source ID
   args:
     - start
     - --role

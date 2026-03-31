@@ -91,6 +91,12 @@ spec:
           - name: CLUSTER_NAME
             value: "{{ .Values.deployment.cluster_name }}"
 {{- end }}
+{{- if .Values.deployment.source_id }}
+          - name: SOURCE_ID
+            value: "{{ .Values.deployment.source_id }}"
+{{- end }}
+          - name: SOURCE_TYPE
+            value: "kubernetes"
 {{- if .Values.deployment.deployment_env }}
           - name: DEPLOYMENT_ENV
             value: "{{ .Values.deployment.deployment_env }}"

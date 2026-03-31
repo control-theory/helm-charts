@@ -98,6 +98,12 @@ spec:
           - name: CLUSTER_NAME
             value: "{{ .Values.daemonset.cluster_name }}"
 {{- end }}
+{{- if .Values.daemonset.source_id }}
+          - name: SOURCE_ID
+            value: "{{ .Values.daemonset.source_id }}"
+{{- end }}
+          - name: SOURCE_TYPE
+            value: "kubernetes"
 {{- if .Values.daemonset.deployment_env }}
           - name: DEPLOYMENT_ENV
             value: "{{ .Values.daemonset.deployment_env }}"
