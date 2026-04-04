@@ -91,7 +91,7 @@ spec:
             value: "{{ .Values.daemonset.org_api_endpoint }}"
 {{- end }}
 {{- if .Values.daemonset.org_dns_id }}
-          - name: ORG_DNS_ID
+          - name: CT_ORG_DNS_ID
             value: "{{ .Values.daemonset.org_dns_id }}"
 {{- end }}
 {{- if .Values.daemonset.cluster_name }}

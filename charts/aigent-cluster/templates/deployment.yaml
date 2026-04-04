@@ -84,7 +84,7 @@ spec:
             value: "{{ .Values.deployment.org_api_endpoint }}"
 {{- end }}
 {{- if .Values.deployment.org_dns_id }}
-          - name: ORG_DNS_ID
+          - name: CT_ORG_DNS_ID
             value: "{{ .Values.deployment.org_dns_id }}"
 {{- end }}
 {{- if .Values.deployment.cluster_name }}
