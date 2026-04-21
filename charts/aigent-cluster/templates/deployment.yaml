@@ -79,13 +79,13 @@ spec:
           - name: ADMISSION_TOKEN
             value: "{{ .Values.deployment.controlplane.admission_token }}"
 {{- end }}
-{{- if .Values.deployment.butler_endpoint }}
-          - name: BUTLER_ENDPOINT
-            value: "{{ .Values.deployment.butler_endpoint }}"
-{{- end }}
 {{- if .Values.deployment.org_api_endpoint }}
           - name: CT_ORG_API_ENDPOINT
             value: "{{ .Values.deployment.org_api_endpoint }}"
+{{- end }}
+{{- if .Values.deployment.org_dns_id }}
+          - name: CT_ORG_DNS_ID
+            value: "{{ .Values.deployment.org_dns_id }}"
 {{- end }}
 {{- if .Values.deployment.cluster_name }}
           - name: CLUSTER_NAME
@@ -95,9 +95,23 @@ spec:
             - name: SOURCE_ID
               value: "{{ .Values.deployment.source_id }}"
 {{- end }}
+{{- if .Values.deployment.source_id }}
+          - name: SOURCE_ID
+            value: "{{ .Values.deployment.source_id }}"
+{{- end }}
+          - name: SOURCE_TYPE
+            value: "kubernetes"
 {{- if .Values.deployment.deployment_env }}
           - name: DEPLOYMENT_ENV
             value: "{{ .Values.deployment.deployment_env }}"
+{{- end }}
+{{- if .Values.deployment.data_endpoint }}
+          - name: CT_BUTLER_ENDPOINT
+            value: "{{ .Values.deployment.data_endpoint }}"
+{{- end }}
+{{- if .Values.deployment.data_tls }}
+          - name: CT_USE_TLS
+            value: "{{ .Values.deployment.data_tls }}"
 {{- end }}
         {{- range $name, $value := .Values.deployment.env }}
           - name: {{ $name }}
