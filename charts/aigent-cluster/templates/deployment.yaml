@@ -90,10 +90,6 @@ spec:
 {{- if .Values.deployment.cluster_name }}
           - name: CLUSTER_NAME
             value: "{{ .Values.deployment.cluster_name }}"
-  {{- end }}
-  {{- if .Values.deployment.source_id }}
-            - name: SOURCE_ID
-              value: "{{ .Values.deployment.source_id }}"
 {{- end }}
 {{- if .Values.deployment.source_id }}
           - name: SOURCE_ID
