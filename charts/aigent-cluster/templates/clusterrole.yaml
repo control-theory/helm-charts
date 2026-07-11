@@ -7,13 +7,16 @@ metadata:
     {{- include "aigent-cluster.labels" . | nindent 4 }}
 rules:
   - apiGroups: [""]
-    resources: ["pods", "namespaces", "nodes"]
+    resources: ["pods", "namespaces", "nodes", "services"]
     verbs: ["get", "list", "watch"]
   - apiGroups: ["apps"]
     resources: ["replicasets", "deployments", "daemonsets", "statefulsets"]
     verbs: ["get", "list", "watch"]
   - apiGroups: ["batch"]
     resources: ["jobs", "cronjobs"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["networking.k8s.io"]
+    resources: ["ingresses"]
     verbs: ["get", "list", "watch"]
   - apiGroups: ["events.k8s.io"]
     resources: ["events"]
