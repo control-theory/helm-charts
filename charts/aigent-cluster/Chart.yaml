@@ -1,6 +1,6 @@
 apiVersion: v2
 name: aigent-cluster
-description: ControlTheory AIgent Cluster - captures k8s events 
+description: ControlTheory AIgent Cluster - captures k8s events
 type: application
-version: 0.3.45
-appVersion: "v1.3.45"
+version: 0.4.0
+appVersion: "v1.4.0"
