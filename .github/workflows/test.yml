@@ -1,0 +1,52 @@
+name: Test
+
+# Reports the status check named exactly `test`, which the org's main-branch
+# ruleset requires on every pull request into main (CR: control-theory/docs#1218).
+# Keep the job id and `name:` as `test`: renaming either one blocks every merge.
+#
+# This repo promotes through `stage`: enforce-stage-only.yml only lets `stage`
+# open a PR into `main`. The workflow therefore also runs on PRs into `stage`,
+# so a change is checked before it lands there, and it has to exist on `stage`
+# for the stage -> main PR to report `test`.
+on:
+  push:
+    branches: [main, stage]
+  pull_request:
+    branches: [main, stage]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.18.5
+
+      # Neither chart declares remote dependencies, so no `helm dependency
+      # build` is needed. Lint, then render with default values so a template
+      # error that lint tolerates still fails the job.
+      - name: helm lint
+        run: |
+          set -euo pipefail
+          for chart in charts/*/; do
+            helm lint "$chart"
+          done
+
+      - name: helm template
+        run: |
+          set -euo pipefail
+          for chart in charts/*/; do
+            helm template ci "$chart" > /dev/null
+          done
