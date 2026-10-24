@@ -123,6 +123,13 @@ spec:
         volumeMounts:
         - name: tmp
           mountPath: /tmp
+{{- if .Values.state.hostPath.enabled }}
+        # The agent's own state that should outlive the pod: the filelog
+        # receiver's offsets (/tmp/aigent/filelog), so a replaced pod resumes
+        # each log where the last one stopped instead of skipping to its end.
+        - name: state
+          mountPath: /tmp/aigent
+{{- end }}
         - name: varlog
           mountPath: /var/log
           readOnly: true
@@ -141,6 +148,12 @@ spec:
       - name: tmp
         emptyDir:
           sizeLimit: 2Gi
+{{- if .Values.state.hostPath.enabled }}
+      - name: state
+        hostPath:
+          path: {{ printf "%s/%s-%s" (trimSuffix "/" .Values.state.hostPath.path) .Release.Namespace .Release.Name | quote }}
+          type: DirectoryOrCreate
+{{- end }}
       - name: varlog
         hostPath:
           path: /var/log
