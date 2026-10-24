@@ -9,7 +9,9 @@
 # The golden files in tests/golden hold each ClusterRole's rules as they were
 # before metricsScrape existed (docs#694). With metricsScrape off, the rules
 # must match them exactly: a customer who never turns scraping on keeps
-# today's RBAC.
+# today's RBAC. The compare is text, whitespace included (comment lines
+# aside), so reformatting a rule fails it even when the RBAC means the same:
+# regenerate the golden file in the same change.
 
 set -uo pipefail
 
@@ -93,6 +95,16 @@ expect_contains "aigent-ds: remoteWrite.enabled opens 9090 on the Service" "$svc
       protocol: TCP
       port: 9090
       targetPort: 9090"
+
+# The port comes from remoteWrite.port, not a literal 9090.
+expect_contains "aigent-ds: remoteWrite.port sets the agent port" \
+  "$(render aigent-ds daemonset.yaml --set remoteWrite.enabled=true --set remoteWrite.port=9201)" \
+"          - name: remote-write
+            containerPort: 9201"
+expect_contains "aigent-ds: remoteWrite.port sets the Service port" \
+  "$(render aigent-ds service.yaml --set remoteWrite.enabled=true --set remoteWrite.port=9201)" \
+"      port: 9201
+      targetPort: 9201"
 
 # Load-bearing (docs#694 §3.4): one sender's series must land in one agent.
 expect_contains "aigent-ds: Service internalTrafficPolicy is Local" "$svc" \
