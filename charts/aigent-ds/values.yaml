@@ -44,8 +44,12 @@ service:
 # receiver's offsets, which let a replaced pod (an upgrade, an eviction, a
 # drain) resume each container log where the last pod stopped instead of
 # skipping to its end. Each release gets its own directory under path
-# (<path>/<namespace>-<release>). Disabled, the state lives in the pod's /tmp
-# and survives only restarts of the container.
+# (<path>/<namespace>/<release>). A new install of a release (after an
+# uninstall) clears what an earlier one left there, so it starts at the end of
+# each log as a fresh install should; upgrades keep it. After a final
+# uninstall the directory stays on each node (a few KB): remove it by hand if
+# wanted. Disabled, the state lives in the pod's /tmp and survives only
+# restarts of the container.
 state:
   hostPath:
     enabled: true

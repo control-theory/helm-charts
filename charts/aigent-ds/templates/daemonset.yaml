@@ -39,6 +39,34 @@ spec:
       tolerations:
         {{- toYaml .Values.tolerations | nindent 8 }}
 {{- end }}
+{{- if .Values.state.hostPath.enabled }}
+      # The node keeps the state across pods, and across uninstalls too. A
+      # reinstall gets a new instance_uid (the agentid ConfigMap goes with the
+      # release), so state another install left is cleared here: resumed weeks
+      # later, it would read every log on the node from the start. Upgrades
+      # keep the uid, and so the offsets.
+      initContainers:
+      - name: state-owner
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        imagePullPolicy: "{{ .Values.image.pullPolicy }}"
+        command:
+          - sh
+          - -c
+          - |
+            if [ "$(cat /state/.owner 2>/dev/null)" != "$AGENT_BASE_ID" ]; then
+              rm -rf /state/* /state/.[!.]*
+              printf '%s' "$AGENT_BASE_ID" > /state/.owner
+            fi
+        env:
+          - name: AGENT_BASE_ID
+            valueFrom:
+              configMapKeyRef:
+                name: {{ .Release.Name }}-agentid
+                key: instance_uid
+        volumeMounts:
+        - name: state
+          mountPath: /state
+{{- end }}
       containers:
       - name: {{ .Release.Name }}
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
@@ -151,7 +179,7 @@ spec:
 {{- if .Values.state.hostPath.enabled }}
       - name: state
         hostPath:
-          path: {{ printf "%s/%s-%s" (trimSuffix "/" .Values.state.hostPath.path) .Release.Namespace .Release.Name | quote }}
+          path: {{ printf "%s/%s/%s" (trimSuffix "/" .Values.state.hostPath.path) .Release.Namespace .Release.Name | quote }}
           type: DirectoryOrCreate
 {{- end }}
       - name: varlog
