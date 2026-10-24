@@ -104,6 +104,12 @@ spec:
             valueFrom:
               fieldRef:
                 fieldPath: spec.nodeName
+          # The node's own address, for scraping this node's kubelet and
+          # node-exporter. Unused unless scraping is on.
+          - name: K8S_NODE_IP
+            valueFrom:
+              fieldRef:
+                fieldPath: status.hostIP
           - name: K8S_POD_NAME
             valueFrom:
               fieldRef:
@@ -172,6 +178,13 @@ spec:
             {{- if .Values.hostPort.enabled }}
             hostPort: {{ .Values.service.otelgrpc.port }}
             {{- end }}
+{{- if .Values.remoteWrite.enabled }}
+          # No hostPort, even with hostPort.enabled: senders reach the agent
+          # on their own node through the Service (internalTrafficPolicy
+          # Local), never through a port opened on the node.
+          - name: remote-write
+            containerPort: {{ .Values.remoteWrite.port }}
+{{- end }}
       volumes:
       - name: tmp
         emptyDir:

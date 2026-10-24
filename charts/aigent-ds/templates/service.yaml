@@ -8,6 +8,10 @@ metadata:
     {{- include "aigent-ds.labels" . | nindent 4 }}
 spec:
   type: {{ .Values.service.otelgrpc.type }}
+  # Local is load-bearing: a sender reaches the agent on its own node, so all
+  # of one sender's series land in one agent. Spread across agents, a
+  # sender's series would give partial minutes and broken counter deltas.
+  # The chart tests pin it.
   internalTrafficPolicy: Local
   selector:
     {{- include "aigent-ds.selectorLabels" . | nindent 4 }}
@@ -20,3 +24,9 @@ spec:
       protocol: TCP
       port: {{ .Values.service.otelgrpc.port }}
       targetPort: {{ .Values.service.otelgrpc.port }}
+{{- if .Values.remoteWrite.enabled }}
+    - name: remote-write
+      protocol: TCP
+      port: {{ .Values.remoteWrite.port }}
+      targetPort: {{ .Values.remoteWrite.port }}
+{{- end }}

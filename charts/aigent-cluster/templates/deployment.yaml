@@ -9,6 +9,12 @@ metadata:
 spec:
   replicas: {{ .Values.replicaCount }}
   revisionHistoryLimit: 2
+  # Never two cluster agents during a rollout: both would scrape
+  # kube-state-metrics and every count would double. Recreate stops the old
+  # pod first, leaving a few seconds with none. A node drain or eviction can
+  # still overlap two for up to the grace period (at most one doubled minute).
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       {{- include "aigent-cluster.selectorLabels" . | nindent 6 }}
