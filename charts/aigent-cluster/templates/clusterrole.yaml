@@ -21,4 +21,14 @@ rules:
   - apiGroups: ["events.k8s.io"]
     resources: ["events"]
     verbs: ["get", "list", "watch"]
+{{- if .Values.metricsScrape.enabled }}
+  # Finding scrape targets: kube-state-metrics and annotated apps, through
+  # their Services' endpoints.
+  - apiGroups: [""]
+    resources: ["endpoints"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["discovery.k8s.io"]
+    resources: ["endpointslices"]
+    verbs: ["get", "list", "watch"]
+{{- end }}
 {{- end }}

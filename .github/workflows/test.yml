@@ -50,3 +50,8 @@ jobs:
           for chart in charts/*/; do
             helm template ci "$chart" > /dev/null
           done
+
+      # Template assertions: what each chart must (and must not) render, with
+      # the RBAC pinned to golden files while optional features are off.
+      - name: chart tests
+        run: bash tests/charts.sh
