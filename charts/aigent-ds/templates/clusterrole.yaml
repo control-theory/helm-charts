@@ -18,7 +18,7 @@ rules:
   - apiGroups: ["events.k8s.io"]
     resources: ["events"]
     verbs: ["get", "list", "watch"]
-{{- if .Values.metricsScrape.enabled }}
+{{- if .Values.promMetrics.enabled }}
   # Scraping this node's kubelet: /metrics and /metrics/cadvisor on :10250
   # need only nodes/metrics, never nodes/proxy. node-exporter is found through
   # pods, granted above.

@@ -178,12 +178,12 @@ spec:
             {{- if .Values.hostPort.enabled }}
             hostPort: {{ .Values.service.otelgrpc.port }}
             {{- end }}
-{{- if .Values.remoteWrite.enabled }}
+{{- if .Values.promMetrics.enabled }}
           # No hostPort, even with hostPort.enabled: senders reach the agent
           # on their own node through the Service (internalTrafficPolicy
           # Local), never through a port opened on the node.
           - name: remote-write
-            containerPort: {{ .Values.remoteWrite.port }}
+            containerPort: {{ .Values.promMetrics.remoteWritePort }}
 {{- end }}
       volumes:
       - name: tmp
