@@ -40,3 +40,11 @@ service:
   otelgrpc:
     type: ClusterIP
     port: 1757
+
+# Prometheus metrics from the cluster agent (kube-state-metrics, annotated
+# apps). Off, the ClusterRole is exactly what event collection needs. On, it
+# adds endpoints and endpointslices (get/list/watch) to find scrape targets.
+# What is scraped is still switched per preset on the source in Dstl8. This
+# chart never installs kube-state-metrics.
+promMetrics:
+  enabled: false

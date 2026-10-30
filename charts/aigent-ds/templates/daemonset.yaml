@@ -39,6 +39,34 @@ spec:
       tolerations:
         {{- toYaml .Values.tolerations | nindent 8 }}
 {{- end }}
+{{- if .Values.state.hostPath.enabled }}
+      # The node keeps the state across pods, and across uninstalls too. A
+      # reinstall gets a new instance_uid (the agentid ConfigMap goes with the
+      # release), so state another install left is cleared here: resumed weeks
+      # later, it would read every log on the node from the start. Upgrades
+      # keep the uid, and so the offsets.
+      initContainers:
+      - name: state-owner
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        imagePullPolicy: "{{ .Values.image.pullPolicy }}"
+        command:
+          - sh
+          - -c
+          - |
+            if [ "$(cat /state/.owner 2>/dev/null)" != "$AGENT_BASE_ID" ]; then
+              rm -rf /state/* /state/.[!.]*
+              printf '%s' "$AGENT_BASE_ID" > /state/.owner
+            fi
+        env:
+          - name: AGENT_BASE_ID
+            valueFrom:
+              configMapKeyRef:
+                name: {{ .Release.Name }}-agentid
+                key: instance_uid
+        volumeMounts:
+        - name: state
+          mountPath: /state
+{{- end }}
       containers:
       - name: {{ .Release.Name }}
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
@@ -76,6 +104,12 @@ spec:
             valueFrom:
               fieldRef:
                 fieldPath: spec.nodeName
+          # The node's own address, for scraping this node's kubelet and
+          # node-exporter. Unused unless scraping is on.
+          - name: K8S_NODE_IP
+            valueFrom:
+              fieldRef:
+                fieldPath: status.hostIP
           - name: K8S_POD_NAME
             valueFrom:
               fieldRef:
@@ -123,6 +157,13 @@ spec:
         volumeMounts:
         - name: tmp
           mountPath: /tmp
+{{- if .Values.state.hostPath.enabled }}
+        # The agent's own state that should outlive the pod: the filelog
+        # receiver's offsets (/tmp/aigent/filelog), so a replaced pod resumes
+        # each log where the last one stopped instead of skipping to its end.
+        - name: state
+          mountPath: /tmp/aigent
+{{- end }}
         - name: varlog
           mountPath: /var/log
           readOnly: true
@@ -137,10 +178,23 @@ spec:
             {{- if .Values.hostPort.enabled }}
             hostPort: {{ .Values.service.otelgrpc.port }}
             {{- end }}
+{{- if .Values.promMetrics.enabled }}
+          # No hostPort, even with hostPort.enabled: senders reach the agent
+          # on their own node through the Service (internalTrafficPolicy
+          # Local), never through a port opened on the node.
+          - name: remote-write
+            containerPort: {{ .Values.promMetrics.remoteWritePort }}
+{{- end }}
       volumes:
       - name: tmp
         emptyDir:
           sizeLimit: 2Gi
+{{- if .Values.state.hostPath.enabled }}
+      - name: state
+        hostPath:
+          path: {{ printf "%s/%s/%s" (trimSuffix "/" .Values.state.hostPath.path) .Release.Namespace .Release.Name | quote }}
+          type: DirectoryOrCreate
+{{- end }}
       - name: varlog
         hostPath:
           path: /var/log

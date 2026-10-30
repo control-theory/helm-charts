@@ -40,5 +40,39 @@ service:
     type: ClusterIP
     port: 1757
 
+# Agent state kept on the node, so it outlives the pod: the filelog
+# receiver's offsets, which let a replaced pod (an upgrade, an eviction, a
+# drain) resume each container log where the last pod stopped instead of
+# skipping to its end. Each release gets its own directory under path
+# (<path>/<namespace>/<release>). A new install of a release (after an
+# uninstall) clears what an earlier one left there, so it starts at the end of
+# each log as a fresh install should; upgrades keep it. After a final
+# uninstall the directory stays on each node (a few KB): remove it by hand if
+# wanted. Disabled, the state lives in the pod's /tmp and survives only
+# restarts of the container.
+#
+# Needs helm's lookup: the directory belongs to the release's agent id, which
+# the <release>-agentid ConfigMap keeps across upgrades only when helm can read
+# the live cluster. A renderer that can't (helm template, Argo CD's default)
+# makes a new id each time the chart is re-rendered and applied; the next pod
+# to start on each node then clears the directory and starts at the end of
+# each log. Pods replaced between renders (an eviction, a drain) keep their
+# offsets.
+state:
+  hostPath:
+    enabled: true
+    path: /var/lib/controltheory/aigent-ds
+
+# Prometheus metrics. Off, the ClusterRole and the Service are exactly what
+# log collection needs. On, it adds nodes/metrics (get) so the agent can read
+# the kubelet's /metrics and /metrics/cadvisor, and opens remoteWritePort on
+# the agent and on the Service for Prometheus remote_write (Remote Write 2.0
+# only), which keeps a sender on the agent on its own node. What is scraped
+# and whether remote_write is served is still switched on the source in
+# Dstl8. This chart never installs node-exporter.
+promMetrics:
+  enabled: false
+  remoteWritePort: 9090
+
 hostPort:
   enabled: false  # Set true to expose ports on node (for node-level telemetry collection)
