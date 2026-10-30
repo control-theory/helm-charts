@@ -7,7 +7,7 @@
 #   tests/charts.sh
 #
 # The golden files in tests/golden hold each ClusterRole's rules as they were
-# before metricsScrape existed (docs#694). With metricsScrape off, the rules
+# before promMetrics existed (docs#694). With promMetrics off, the rules
 # must match them exactly: a customer who never turns scraping on keeps
 # today's RBAC. The compare is text, whitespace included (comment lines
 # aside), so reformatting a rule fails it even when the RBAC means the same:
@@ -63,11 +63,11 @@ golden=$(cat tests/golden/aigent-ds-clusterrole-rules.yaml)
 
 expect_equal "aigent-ds: RBAC unchanged by default" \
   "$(rules aigent-ds)" "$golden"
-expect_equal "aigent-ds: RBAC unchanged with metricsScrape.enabled=false" \
-  "$(rules aigent-ds --set metricsScrape.enabled=false)" "$golden"
+expect_equal "aigent-ds: RBAC unchanged with promMetrics.enabled=false" \
+  "$(rules aigent-ds --set promMetrics.enabled=false)" "$golden"
 
-on=$(rules aigent-ds --set metricsScrape.enabled=true)
-expect_equal "aigent-ds: metricsScrape.enabled adds exactly nodes/metrics (get)" \
+on=$(rules aigent-ds --set promMetrics.enabled=true)
+expect_equal "aigent-ds: promMetrics.enabled adds exactly nodes/metrics (get)" \
   "$on" "$golden
   - apiGroups: [\"\"]
     resources: [\"nodes/metrics\"]
@@ -85,24 +85,24 @@ svc=$(render aigent-ds service.yaml)
 expect_absent "aigent-ds: no remote-write port on the agent by default" "$ds" "remote-write"
 expect_absent "aigent-ds: no remote-write port on the Service by default" "$svc" "remote-write"
 
-ds_rw=$(render aigent-ds daemonset.yaml --set remoteWrite.enabled=true)
-svc_rw=$(render aigent-ds service.yaml --set remoteWrite.enabled=true)
-expect_contains "aigent-ds: remoteWrite.enabled opens 9090 on the agent" "$ds_rw" \
+ds_rw=$(render aigent-ds daemonset.yaml --set promMetrics.enabled=true)
+svc_rw=$(render aigent-ds service.yaml --set promMetrics.enabled=true)
+expect_contains "aigent-ds: promMetrics.enabled opens 9090 on the agent" "$ds_rw" \
 "          - name: remote-write
             containerPort: 9090"
-expect_contains "aigent-ds: remoteWrite.enabled opens 9090 on the Service" "$svc_rw" \
+expect_contains "aigent-ds: promMetrics.enabled opens 9090 on the Service" "$svc_rw" \
 "    - name: remote-write
       protocol: TCP
       port: 9090
       targetPort: 9090"
 
-# The port comes from remoteWrite.port, not a literal 9090.
-expect_contains "aigent-ds: remoteWrite.port sets the agent port" \
-  "$(render aigent-ds daemonset.yaml --set remoteWrite.enabled=true --set remoteWrite.port=9201)" \
+# The port comes from promMetrics.remoteWritePort, not a literal 9090.
+expect_contains "aigent-ds: promMetrics.remoteWritePort sets the agent port" \
+  "$(render aigent-ds daemonset.yaml --set promMetrics.enabled=true --set promMetrics.remoteWritePort=9201)" \
 "          - name: remote-write
             containerPort: 9201"
-expect_contains "aigent-ds: remoteWrite.port sets the Service port" \
-  "$(render aigent-ds service.yaml --set remoteWrite.enabled=true --set remoteWrite.port=9201)" \
+expect_contains "aigent-ds: promMetrics.remoteWritePort sets the Service port" \
+  "$(render aigent-ds service.yaml --set promMetrics.enabled=true --set promMetrics.remoteWritePort=9201)" \
 "      port: 9201
       targetPort: 9201"
 
@@ -118,10 +118,10 @@ golden=$(cat tests/golden/aigent-cluster-clusterrole-rules.yaml)
 
 expect_equal "aigent-cluster: RBAC unchanged by default" \
   "$(rules aigent-cluster)" "$golden"
-expect_equal "aigent-cluster: RBAC unchanged with metricsScrape.enabled=false" \
-  "$(rules aigent-cluster --set metricsScrape.enabled=false)" "$golden"
-expect_equal "aigent-cluster: metricsScrape.enabled adds exactly endpoints and endpointslices" \
-  "$(rules aigent-cluster --set metricsScrape.enabled=true)" "$golden
+expect_equal "aigent-cluster: RBAC unchanged with promMetrics.enabled=false" \
+  "$(rules aigent-cluster --set promMetrics.enabled=false)" "$golden"
+expect_equal "aigent-cluster: promMetrics.enabled adds exactly endpoints and endpointslices" \
+  "$(rules aigent-cluster --set promMetrics.enabled=true)" "$golden
   - apiGroups: [\"\"]
     resources: [\"endpoints\"]
     verbs: [\"get\", \"list\", \"watch\"]
@@ -134,8 +134,8 @@ recreate="  strategy:
     type: Recreate"
 expect_contains "aigent-cluster: Deployment strategy is Recreate" \
   "$(render aigent-cluster deployment.yaml)" "$recreate"
-expect_contains "aigent-cluster: Deployment strategy is Recreate with metricsScrape" \
-  "$(render aigent-cluster deployment.yaml --set metricsScrape.enabled=true)" "$recreate"
+expect_contains "aigent-cluster: Deployment strategy is Recreate with promMetrics" \
+  "$(render aigent-cluster deployment.yaml --set promMetrics.enabled=true)" "$recreate"
 
 if ((failures > 0)); then
   printf '\n%d check(s) failed\n' "$failures"

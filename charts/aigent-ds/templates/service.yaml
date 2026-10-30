@@ -24,9 +24,9 @@ spec:
       protocol: TCP
       port: {{ .Values.service.otelgrpc.port }}
       targetPort: {{ .Values.service.otelgrpc.port }}
-{{- if .Values.remoteWrite.enabled }}
+{{- if .Values.promMetrics.enabled }}
     - name: remote-write
       protocol: TCP
-      port: {{ .Values.remoteWrite.port }}
-      targetPort: {{ .Values.remoteWrite.port }}
+      port: {{ .Values.promMetrics.remoteWritePort }}
+      targetPort: {{ .Values.promMetrics.remoteWritePort }}
 {{- end }}

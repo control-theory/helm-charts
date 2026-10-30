@@ -55,20 +55,16 @@ state:
     enabled: true
     path: /var/lib/controltheory/aigent-ds
 
-# Prometheus scraping of this node (kubelet, cAdvisor, node-exporter). Off,
-# the ClusterRole is exactly what log collection needs. On, it adds
-# nodes/metrics (get) so the agent can read the kubelet's /metrics and
-# /metrics/cadvisor. What is scraped is still switched per preset on the
-# source in Dstl8. This chart never installs node-exporter.
-metricsScrape:
+# Prometheus metrics. Off, the ClusterRole and the Service are exactly what
+# log collection needs. On, it adds nodes/metrics (get) so the agent can read
+# the kubelet's /metrics and /metrics/cadvisor, and opens remoteWritePort on
+# the agent and on the Service for Prometheus remote_write (Remote Write 2.0
+# only), which keeps a sender on the agent on its own node. What is scraped
+# and whether remote_write is served is still switched on the source in
+# Dstl8. This chart never installs node-exporter.
+promMetrics:
   enabled: false
-
-# Prometheus remote_write into the agent on each node (Remote Write 2.0
-# only). On, it opens the port on the agent and on the Service, which keeps a
-# sender on the agent on its own node. The source in Dstl8 must opt in too.
-remoteWrite:
-  enabled: false
-  port: 9090
+  remoteWritePort: 9090
 
 hostPort:
   enabled: false  # Set true to expose ports on node (for node-level telemetry collection)
