@@ -129,13 +129,18 @@ expect_equal "aigent-cluster: promMetrics.enabled adds exactly endpoints and end
     resources: [\"endpointslices\"]
     verbs: [\"get\", \"list\", \"watch\"]"
 
-# D5: never two cluster agents during a rollout.
-recreate="  strategy:
-    type: Recreate"
-expect_contains "aigent-cluster: Deployment strategy is Recreate" \
-  "$(render aigent-cluster deployment.yaml)" "$recreate"
-expect_contains "aigent-cluster: Deployment strategy is Recreate with promMetrics" \
-  "$(render aigent-cluster deployment.yaml --set promMetrics.enabled=true)" "$recreate"
+# D5: never two cluster agents during a rollout: the old pod stops first. Not
+# type Recreate, which an upgrade from a default-RollingUpdate release can't
+# apply (the API keeps the defaulted rollingUpdate block).
+oldfirst="  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1"
+expect_contains "aigent-cluster: Deployment stops the old pod first" \
+  "$(render aigent-cluster deployment.yaml)" "$oldfirst"
+expect_contains "aigent-cluster: Deployment stops the old pod first with promMetrics" \
+  "$(render aigent-cluster deployment.yaml --set promMetrics.enabled=true)" "$oldfirst"
 
 if ((failures > 0)); then
   printf '\n%d check(s) failed\n' "$failures"
