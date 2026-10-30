@@ -50,6 +50,14 @@ service:
 # uninstall the directory stays on each node (a few KB): remove it by hand if
 # wanted. Disabled, the state lives in the pod's /tmp and survives only
 # restarts of the container.
+#
+# Needs helm's lookup: the directory belongs to the release's agent id, which
+# the <release>-agentid ConfigMap keeps across upgrades only when helm can read
+# the live cluster. A renderer that can't (helm template, Argo CD's default)
+# makes a new id each time the chart is re-rendered and applied; the next pod
+# to start on each node then clears the directory and starts at the end of
+# each log. Pods replaced between renders (an eviction, a drain) keep their
+# offsets.
 state:
   hostPath:
     enabled: true
