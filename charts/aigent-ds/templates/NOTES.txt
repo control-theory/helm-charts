@@ -6,13 +6,5 @@ Namespace: {{ .Release.Namespace }}
 The AIgent DaemonSet runs on each node in the cluster, collecting and
 aggregating logs locally before sending.
 
-{{- if .Values.state.hostPath.enabled }}
-
-Log offsets are kept on each node under {{ .Values.state.hostPath.path }}, so a
-replaced pod resumes where the last one stopped. This needs helm's lookup:
-with helm template or Argo CD's default rendering, offsets last only as long
-as the pod.
-{{- end }}
-
 To check running pods:
   kubectl get pods -n {{ .Release.Namespace }} -l app.kubernetes.io/name=aigent-ds
