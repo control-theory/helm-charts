@@ -10,11 +10,17 @@ spec:
   replicas: {{ .Values.replicaCount }}
   revisionHistoryLimit: 2
   # Never two cluster agents during a rollout: both would scrape
-  # kube-state-metrics and every count would double. Recreate stops the old
+  # kube-state-metrics and every count would double. maxSurge 0 stops the old
   # pod first, leaving a few seconds with none. A node drain or eviction can
   # still overlap two for up to the grace period (at most one doubled minute).
+  # Not type Recreate: an upgrade from a release that used the default
+  # RollingUpdate keeps the API-defaulted rollingUpdate block (no field
+  # manager owns it), and the API refuses Recreate with that block present.
   strategy:
-    type: Recreate
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
   selector:
     matchLabels:
       {{- include "aigent-cluster.selectorLabels" . | nindent 6 }}
