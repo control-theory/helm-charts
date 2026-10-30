@@ -2,6 +2,16 @@ apiVersion: v1
 entries:
   aigent-cluster:
   - apiVersion: v2
+    appVersion: v1.4.10
+    created: "2026-10-30T03:10:27.076670742Z"
+    description: ControlTheory AIgent Cluster - captures k8s events
+    digest: 93d23fc28fb8774affbeffaa54c40ba9c7f6c52eff8722dc83e9250fe88ee803
+    name: aigent-cluster
+    type: application
+    urls:
+    - https://github.com/control-theory/helm-charts/releases/download/aigent-cluster-0.4.2-stage.120/aigent-cluster-0.4.2-stage.120.tgz
+    version: 0.4.2-stage.120
+  - apiVersion: v2
     appVersion: v1.4.0
     created: "2026-10-24T17:33:04.272076887Z"
     description: ControlTheory AIgent Cluster - captures k8s events
@@ -582,6 +592,16 @@ entries:
     - https://github.com/control-theory/helm-charts/releases/download/aigent-cluster-0.2.1/aigent-cluster-0.2.1.tgz
     version: 0.2.1
   aigent-ds:
+  - apiVersion: v2
+    appVersion: v1.4.10
+    created: "2026-10-30T03:10:27.338483025Z"
+    description: ControlTheory AIgent DaemonSet - AI-powered log aggregation per node
+    digest: 157407e5718c8a11166a05b90982b975e849240e86c2a6cc3e808674e4b11c15
+    name: aigent-ds
+    type: application
+    urls:
+    - https://github.com/control-theory/helm-charts/releases/download/aigent-ds-0.4.3-stage.120/aigent-ds-0.4.3-stage.120.tgz
+    version: 0.4.3-stage.120
   - apiVersion: v2
     appVersion: v1.4.0
     created: "2026-10-24T17:33:04.473947454Z"
@@ -1242,4 +1262,4 @@ entries:
     urls:
     - https://github.com/control-theory/helm-charts/releases/download/aigent-ds-0.1.6/aigent-ds-0.1.6.tgz
     version: 0.1.6
-generated: "2026-10-24T17:33:04.47463327Z"
+generated: "2026-10-30T03:10:27.338919164Z"
