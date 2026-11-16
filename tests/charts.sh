@@ -142,6 +142,11 @@ expect_contains "aigent-cluster: Deployment stops the old pod first" \
 expect_contains "aigent-cluster: Deployment stops the old pod first with promMetrics" \
   "$(render aigent-cluster deployment.yaml --set promMetrics.enabled=true)" "$oldfirst"
 
+# A tolerate-everything Deployment also tolerates node.kubernetes.io/unschedulable
+# and lands back on the node being drained, so the drain never finishes.
+expect_absent "aigent-cluster: no tolerations by default (drains finish)" \
+  "$(render aigent-cluster deployment.yaml)" "tolerations:"
+
 if ((failures > 0)); then
   printf '\n%d check(s) failed\n' "$failures"
   exit 1
