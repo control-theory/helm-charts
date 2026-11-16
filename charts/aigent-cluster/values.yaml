@@ -18,8 +18,12 @@ deployment:
   nodeSelector: {}
   env: {}
 
-# Node Scheduling - any node that has capacity
-tolerateAllTaints: true
+# Node Scheduling - regular worker nodes by default.
+# tolerateAllTaints also tolerates node.kubernetes.io/unschedulable, so a drained
+# (cordoned) node gets this single-replica pod straight back and the drain never
+# finishes (EKS node group updates, Karpenter, cluster-autoscaler, kubectl drain).
+# Prefer tolerateTaintKeys or tolerations if the pod must land on tainted nodes.
+tolerateAllTaints: false
 tolerateTaintKeys: []
 tolerations: []
 
