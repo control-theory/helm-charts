@@ -185,7 +185,9 @@ expect_contains "aigent-cluster: NOTES render (guards the tpl copy)" \
 expect_contains "aigent-cluster: NOTES warn when no taints are tolerated" \
   "$(notes)" "Before chart 0.5.0 it tolerated every taint"
 expect_contains "aigent-cluster: NOTES warn about drains when tolerateAllTaints=true" \
-  "$(notes --set tolerateAllTaints=true)" "a node drain never finishes"
+  "$(notes --set tolerateAllTaints=true)" "tolerateAllTaints is true"
+expect_absent "aigent-cluster: NOTES with tolerateAllTaints=true skip the nothing-tolerated text" \
+  "$(notes --set tolerateAllTaints=true)" "Before chart 0.5.0"
 expect_absent "aigent-cluster: NOTES quiet when tolerateTaintKeys is set" \
   "$(notes --set 'tolerateTaintKeys[0]=dedicated')" "Scheduling:"
 expect_absent "aigent-cluster: NOTES quiet when tolerations are set" \
