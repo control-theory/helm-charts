@@ -2,4 +2,15 @@ AIgent Cluster has been installed.
 
 Release: {{ .Release.Name }}
 Namespace: {{ .Release.Namespace }}
+{{- if and (not .Values.tolerateAllTaints) (eq (len .Values.tolerateTaintKeys) 0) (eq (len .Values.tolerations) 0) }}
+
+Scheduling: no taints are tolerated, so the agent runs only on untainted nodes.
+Before chart 0.5.0 it tolerated every taint by default. If it has to run on
+tainted nodes, set tolerateTaintKeys (or tolerations), for example:
+
+  --set tolerateTaintKeys[0]=<taint-key>
+
+tolerateAllTaints=true restores the old behaviour, but then the pod also
+tolerates node.kubernetes.io/unschedulable and a node drain never finishes.
+{{- end }}
 

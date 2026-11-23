@@ -90,6 +90,25 @@ helm upgrade --install aigent-cluster ct-helm/aigent-cluster \
 
 See each chart's `values.yaml` for the full set of configurable values.
 
+### Upgrading to 0.5.0
+
+`aigent-cluster` no longer tolerates every taint by default (`tolerateAllTaints`
+is now `false`). Tolerating everything also tolerated
+`node.kubernetes.io/unschedulable`, so the pod landed back on a node being
+drained and the drain never finished.
+
+If the cluster agent has to run on tainted nodes, set `tolerateTaintKeys` (or
+`tolerations`) on upgrade:
+
+```bash
+helm upgrade aigent-cluster ct-helm/aigent-cluster --reuse-values \
+  --set tolerateTaintKeys[0]=<taint-key>
+```
+
+Otherwise a pod on a tainted node is evicted by a `NoExecute` taint, or cannot
+be rescheduled past a `NoSchedule` one. `aigent-ds` is unchanged; it moves to
+0.5.0 with `aigent-cluster` so the two charts keep one version.
+
 ## Contributing
 
 Charts are published from this repo via GitHub Pages. Changes are tested on

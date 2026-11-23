@@ -147,6 +147,28 @@ expect_contains "aigent-cluster: Deployment stops the old pod first with promMet
 expect_absent "aigent-cluster: no tolerations by default (drains finish)" \
   "$(render aigent-cluster deployment.yaml)" "tolerations:"
 
+# The opt-ins still work, and tolerateAllTaints wins over the others.
+all="      tolerations:
+        - operator: \"Exists\""
+expect_contains "aigent-cluster: tolerateAllTaints=true tolerates everything" \
+  "$(render aigent-cluster deployment.yaml --set tolerateAllTaints=true)" "$all"
+expect_contains "aigent-cluster: tolerateTaintKeys tolerates each key" \
+  "$(render aigent-cluster deployment.yaml --set 'tolerateTaintKeys[0]=dedicated')" \
+"      tolerations:
+        - key: \"dedicated\"
+          operator: \"Exists\""
+expect_contains "aigent-cluster: tolerateAllTaints wins over tolerateTaintKeys" \
+  "$(render aigent-cluster deployment.yaml --set tolerateAllTaints=true --set 'tolerateTaintKeys[0]=dedicated')" "$all"
+
+# NOTES.txt tells an upgrader the default changed, only when nothing is tolerated.
+# helm template cannot render NOTES.txt on helm 4; a client-side dry-run
+# install prints it on helm 3.13+ and 4, with no cluster.
+notes() { helm install ci charts/aigent-cluster --dry-run=client "$@"; }
+expect_contains "aigent-cluster: NOTES warn when no taints are tolerated" \
+  "$(notes)" "Before chart 0.5.0 it tolerated every taint"
+expect_absent "aigent-cluster: NOTES quiet when tolerateTaintKeys is set" \
+  "$(notes --set 'tolerateTaintKeys[0]=dedicated')" "Before chart 0.5.0"
+
 if ((failures > 0)); then
   printf '\n%d check(s) failed\n' "$failures"
   exit 1
