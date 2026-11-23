@@ -97,16 +97,21 @@ is now `false`). Tolerating everything also tolerated
 `node.kubernetes.io/unschedulable`, so the pod landed back on a node being
 drained and the drain never finished.
 
-If the cluster agent has to run on tainted nodes, set `tolerateTaintKeys` (or
-`tolerations`) on upgrade:
+Upgrade with `--reset-then-reuse-values` (Helm 3.14+), which takes the new
+chart's defaults and then re-applies the values you set. Plain `--reuse-values`
+also carries over the old chart's defaults, so the release keeps
+`tolerateAllTaints: true` and nothing changes. If the cluster agent has to run
+on tainted nodes, add `tolerateTaintKeys` (or `tolerations`):
 
 ```bash
-helm upgrade aigent-cluster ct-helm/aigent-cluster --reuse-values \
+helm upgrade aigent-cluster ct-helm/aigent-cluster --reset-then-reuse-values \
   --set tolerateTaintKeys[0]=<taint-key>
 ```
 
-Otherwise a pod on a tainted node is evicted by a `NoExecute` taint, or cannot
-be rescheduled past a `NoSchedule` one. `aigent-ds` is unchanged; it moves to
+On older Helm, or if you upgraded with `--reuse-values` already, add
+`--set tolerateAllTaints=false`. Without a toleration, a pod on a tainted node
+is evicted by a `NoExecute` taint, or cannot be rescheduled past a
+`NoSchedule` one. `aigent-ds` is unchanged; it moves to
 0.5.0 with `aigent-cluster` so the two charts keep one version.
 
 ## Contributing

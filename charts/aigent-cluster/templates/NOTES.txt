@@ -2,7 +2,14 @@ AIgent Cluster has been installed.
 
 Release: {{ .Release.Name }}
 Namespace: {{ .Release.Namespace }}
-{{- if and (not .Values.tolerateAllTaints) (eq (len .Values.tolerateTaintKeys) 0) (eq (len .Values.tolerations) 0) }}
+{{- if .Values.tolerateAllTaints }}
+
+Scheduling: tolerateAllTaints is true, so the agent tolerates every taint,
+including node.kubernetes.io/unschedulable: a node drain never finishes while
+it runs there. The default is false since chart 0.5.0. An upgrade with
+--reuse-values keeps the old default; use --reset-then-reuse-values, or set
+tolerateAllTaints=false and list the taints with tolerateTaintKeys.
+{{- else if and (eq (len .Values.tolerateTaintKeys) 0) (eq (len .Values.tolerations) 0) }}
 
 Scheduling: no taints are tolerated, so the agent runs only on untainted nodes.
 Before chart 0.5.0 it tolerated every taint by default. If it has to run on

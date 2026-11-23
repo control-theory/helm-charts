@@ -160,14 +160,36 @@ expect_contains "aigent-cluster: tolerateTaintKeys tolerates each key" \
 expect_contains "aigent-cluster: tolerateAllTaints wins over tolerateTaintKeys" \
   "$(render aigent-cluster deployment.yaml --set tolerateAllTaints=true --set 'tolerateTaintKeys[0]=dedicated')" "$all"
 
-# NOTES.txt tells an upgrader the default changed, only when nothing is tolerated.
-# helm template cannot render NOTES.txt on helm 4; a client-side dry-run
-# install prints it on helm 3.13+ and 4, with no cluster.
-notes() { helm install ci charts/aigent-cluster --dry-run=client "$@"; }
+toleration=(--set 'tolerations[0].key=dedicated' --set 'tolerations[0].operator=Equal' \
+  --set 'tolerations[0].value=agents' --set 'tolerations[0].effect=NoSchedule')
+expect_contains "aigent-cluster: tolerations are rendered as given" \
+  "$(render aigent-cluster deployment.yaml "${toleration[@]}")" "value: agents"
+expect_absent "aigent-cluster: tolerateTaintKeys wins over tolerations" \
+  "$(render aigent-cluster deployment.yaml "${toleration[@]}" --set 'tolerateTaintKeys[0]=other')" "value: agents"
+
+# NOTES.txt warns an upgrader about the taint default. helm template does not
+# render NOTES.txt (helm 3 or 4), and a dry-run install needs a cluster on
+# helm 3, so render a copy of it with tpl in a scratch chart.
+notes() {
+  local tmp
+  tmp=$(mktemp -d)
+  cp -R charts/aigent-cluster "$tmp/"
+  mv "$tmp/aigent-cluster/templates/NOTES.txt" "$tmp/aigent-cluster/notes.txt"
+  printf 'notes: |\n{{ tpl (.Files.Get "notes.txt") . | indent 2 }}\n' \
+    > "$tmp/aigent-cluster/templates/notes-check.yaml"
+  helm template ci "$tmp/aigent-cluster" -s templates/notes-check.yaml "$@"
+  rm -rf "$tmp"
+}
+expect_contains "aigent-cluster: NOTES render (guards the tpl copy)" \
+  "$(notes)" "AIgent Cluster has been installed."
 expect_contains "aigent-cluster: NOTES warn when no taints are tolerated" \
   "$(notes)" "Before chart 0.5.0 it tolerated every taint"
+expect_contains "aigent-cluster: NOTES warn about drains when tolerateAllTaints=true" \
+  "$(notes --set tolerateAllTaints=true)" "a node drain never finishes"
 expect_absent "aigent-cluster: NOTES quiet when tolerateTaintKeys is set" \
-  "$(notes --set 'tolerateTaintKeys[0]=dedicated')" "Before chart 0.5.0"
+  "$(notes --set 'tolerateTaintKeys[0]=dedicated')" "Scheduling:"
+expect_absent "aigent-cluster: NOTES quiet when tolerations are set" \
+  "$(notes "${toleration[@]}")" "Scheduling:"
 
 if ((failures > 0)); then
   printf '\n%d check(s) failed\n' "$failures"
