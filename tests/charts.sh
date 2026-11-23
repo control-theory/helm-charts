@@ -142,6 +142,57 @@ expect_contains "aigent-cluster: Deployment stops the old pod first" \
 expect_contains "aigent-cluster: Deployment stops the old pod first with promMetrics" \
   "$(render aigent-cluster deployment.yaml --set promMetrics.enabled=true)" "$oldfirst"
 
+# A tolerate-everything Deployment also tolerates node.kubernetes.io/unschedulable
+# and lands back on the node being drained, so the drain never finishes.
+expect_absent "aigent-cluster: no tolerations by default (drains finish)" \
+  "$(render aigent-cluster deployment.yaml)" "tolerations:"
+
+# The opt-ins still work, and tolerateAllTaints wins over the others.
+all="      tolerations:
+        - operator: \"Exists\""
+expect_contains "aigent-cluster: tolerateAllTaints=true tolerates everything" \
+  "$(render aigent-cluster deployment.yaml --set tolerateAllTaints=true)" "$all"
+expect_contains "aigent-cluster: tolerateTaintKeys tolerates each key" \
+  "$(render aigent-cluster deployment.yaml --set 'tolerateTaintKeys[0]=dedicated')" \
+"      tolerations:
+        - key: \"dedicated\"
+          operator: \"Exists\""
+expect_contains "aigent-cluster: tolerateAllTaints wins over tolerateTaintKeys" \
+  "$(render aigent-cluster deployment.yaml --set tolerateAllTaints=true --set 'tolerateTaintKeys[0]=dedicated')" "$all"
+
+toleration=(--set 'tolerations[0].key=dedicated' --set 'tolerations[0].operator=Equal' \
+  --set 'tolerations[0].value=agents' --set 'tolerations[0].effect=NoSchedule')
+expect_contains "aigent-cluster: tolerations are rendered as given" \
+  "$(render aigent-cluster deployment.yaml "${toleration[@]}")" "value: agents"
+expect_absent "aigent-cluster: tolerateTaintKeys wins over tolerations" \
+  "$(render aigent-cluster deployment.yaml "${toleration[@]}" --set 'tolerateTaintKeys[0]=other')" "value: agents"
+
+# NOTES.txt warns an upgrader about the taint default. helm template does not
+# render NOTES.txt (helm 3 or 4), and a dry-run install needs a cluster on
+# helm 3, so render a copy of it with tpl in a scratch chart.
+notes() {
+  local tmp
+  tmp=$(mktemp -d)
+  cp -R charts/aigent-cluster "$tmp/"
+  mv "$tmp/aigent-cluster/templates/NOTES.txt" "$tmp/aigent-cluster/notes.txt"
+  printf 'notes: |\n{{ tpl (.Files.Get "notes.txt") . | indent 2 }}\n' \
+    > "$tmp/aigent-cluster/templates/notes-check.yaml"
+  helm template ci "$tmp/aigent-cluster" -s templates/notes-check.yaml "$@"
+  rm -rf "$tmp"
+}
+expect_contains "aigent-cluster: NOTES render (guards the tpl copy)" \
+  "$(notes)" "AIgent Cluster has been installed."
+expect_contains "aigent-cluster: NOTES warn when no taints are tolerated" \
+  "$(notes)" "Before chart 0.5.0 it tolerated every taint"
+expect_contains "aigent-cluster: NOTES warn about drains when tolerateAllTaints=true" \
+  "$(notes --set tolerateAllTaints=true)" "tolerateAllTaints is true"
+expect_absent "aigent-cluster: NOTES with tolerateAllTaints=true skip the nothing-tolerated text" \
+  "$(notes --set tolerateAllTaints=true)" "Before chart 0.5.0"
+expect_absent "aigent-cluster: NOTES quiet when tolerateTaintKeys is set" \
+  "$(notes --set 'tolerateTaintKeys[0]=dedicated')" "Scheduling:"
+expect_absent "aigent-cluster: NOTES quiet when tolerations are set" \
+  "$(notes "${toleration[@]}")" "Scheduling:"
+
 if ((failures > 0)); then
   printf '\n%d check(s) failed\n' "$failures"
   exit 1
